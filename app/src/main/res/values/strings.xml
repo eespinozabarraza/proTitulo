@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">proTitulo</string>
+    <string name="email">Correo Electronico</string>
+    <string name="password">Contraseña</string>
+    <string name="login">Ingresar</string>
+    <string name="registrar">Registrarse</string>
+    <string name="tracking_enabled_notif">Tracking is currently enabled. Tap to cancel.</string>
+    <string name="firebase_path">location</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="title_activity_tracking">tracking</string>
+</resources>

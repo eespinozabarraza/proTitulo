@@ -28,3 +28,21 @@ Instrucciones para la clonación del código fuente y la virtualización de la a
   https://github.com/eespinozabarraza/proTitulo.git
   
   -Una vez que Gradle termine de construir, ve a Run>Run APP
+  
+  
+  ______________________________________________________________________________________________________________________
+  
+  Descarga e instalación de APK.
+  Dentro del apartado Releases se encontraran todas las versiones de los entregables con funcionalidades acordes al plan de trabajo.
+  Versión Actual: V0.2.0. preRelease.
+  
+  Requisitos:
+Smartphone con sistema operativo Android con api level mínimo 15 y servicios de google play.
+Instrucciones de Instalación.
+
+ - Descarga el archivo proTitulov0.2.0.apk y alójalo en una carpeta accesible para tu teléfono.
+ - Habilita orígenes desconocidos en tu smartphone.
+ - Ajustes -> Seguridad ->Orígenes desconocidos (Activar y aceptar advertencia).
+ - Dirigirse a la carpeta donde se encuentra el archivo proTitulov0.2.0.apk y pulsar sobre el.
+ - Aceptar los permisos.
+

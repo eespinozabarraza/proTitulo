@@ -34,7 +34,7 @@ Instrucciones para la clonación del código fuente y la virtualización de la a
   
   Descarga e instalación de APK.
   Dentro del apartado Releases se encontraran todas las versiones de los entregables con funcionalidades acordes al plan de trabajo.
-  Versión Actual: V0.2.0. preRelease.
+  Versión Actual: V0.2.1. preRelease.
   
   Requisitos:
 Smartphone con sistema operativo Android con api level mínimo 15 y servicios de google play.

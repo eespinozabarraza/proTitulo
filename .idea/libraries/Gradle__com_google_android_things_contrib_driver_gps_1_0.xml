@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: com.google.android.things.contrib:driver-gps-1.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/driver-gps-1.0.aar/20ccb8efd2fb9c26a5a162750d8ca962/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/driver-gps-1.0.aar/20ccb8efd2fb9c26a5a162750d8ca962/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.android.things.contrib/driver-gps/1.0/af1483807aefe0dc48ef19f4b86f59a553eeaae/driver-gps-1.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

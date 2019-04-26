@@ -428,6 +428,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onSensorChanged(SensorEvent event) {
         Log.d(TAG, "onSensorChanged: X: " + event.values[0] + "Y: " + event.values[1]+"Z: " + event.values[2]);
+        Toast.makeText(this , "onSensorChanged: X: " + event.values[0] + "Y: " + event.values[1]+"Z: " + event.values[2], Toast.LENGTH_LONG).show();
 
     }
 

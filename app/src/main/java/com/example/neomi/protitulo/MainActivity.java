@@ -4,6 +4,10 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.GnssNavigationMessage;
 import android.location.Location;
 import android.location.GnssStatus;
@@ -67,7 +71,7 @@ import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener {
+        GoogleApiClient.OnConnectionFailedListener, LocationListener, SensorEventListener {
 
     private DatabaseReference mDatabaseRef;
 
@@ -84,6 +88,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     BroadcastReceiver broadcastReceiver;
 
     private String ACTIVIDAD,CONFIANZA;
+// Variables Acelerometro
+    private SensorManager sensorManager;
+    Sensor accelerometer;
 
 // Variables Satellite
     private LocationManager mLocationManager;
@@ -114,6 +121,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
         locationTv = findViewById( R.id.location );
+
+        //Manager del Sensor
+
+        sensorManager =(SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        Log.d(TAG, "onCreate: Registered accelerometer listener");
+
 
         //fecha?//
 
@@ -409,9 +424,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         finish();
     }
 
+// funciones acelerometro
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        Log.d(TAG, "onSensorChanged: X: " + event.values[0] + "Y: " + event.values[1]+"Z: " + event.values[2]);
 
+    }
 
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
-
-
+    }
 }

@@ -44,9 +44,6 @@ dependencies {
     //GooglePlay
     implementation 'com.google.android.gms:play-services-location:16.0.0'
 
-    implementation 'com.google.android.things.contrib:driver-gps:1.0'
-    compileOnly 'com.google.android.things:androidthings:1.0'
-
 
 }
 apply plugin: 'com.google.gms.google-services'

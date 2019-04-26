@@ -15,7 +15,6 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -27,51 +26,29 @@ import android.widget.Toast;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
-import android.app.Activity;
-import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.location.OnNmeaMessageListener;
 import android.location.GnssMeasurementsEvent;
-import android.location.GnssStatus.Callback;
-
 
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
 
 
-
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.concurrent.TimeUnit;
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener, SensorEventListener {
+        GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private DatabaseReference mDatabaseRef;
 
@@ -88,9 +65,42 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     BroadcastReceiver broadcastReceiver;
 
     private String ACTIVIDAD,CONFIANZA;
-// Variables Acelerometro
-    private SensorManager sensorManager;
-    Sensor accelerometer;
+
+// Variables Acelerometro y magnetometro
+    private SensorEventListener mSensorEventListener = new SensorEventListener(){
+    float[] gData = new float[3]; // accelerometer
+    float[] mData = new float[3]; // magnetometer
+    float[] rMat = new float[9];
+    float[] iMat = new float[9];
+    float[] orientation = new float[3];
+
+    public void onAccuracyChanged( Sensor sensor, int accuracy ) {}
+
+    @Override
+    public void onSensorChanged( SensorEvent event ) {
+        float[] data;
+        switch ( event.sensor.getType() ) {
+            case Sensor.TYPE_ACCELEROMETER:
+                gData = event.values.clone();
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                mData = event.values.clone();
+                break;
+            default: return;
+        }
+
+        if ( SensorManager.getRotationMatrix( rMat, iMat, gData, mData ) ) {
+            mAzimuth= (int) ( Math.toDegrees( SensorManager.getOrientation( rMat, orientation )[0] ) + 360 ) % 360;
+        }
+    }
+    };
+    private int mAzimuth = 0; //grados
+    private SensorManager mSensorManager = null;
+    private Sensor mAccelerometer;
+    private Sensor mMagnetometer;
+    boolean haveAccelerometer = false;
+    boolean haveMagnetometer = false;
+
 
 // Variables Satellite
     private LocationManager mLocationManager;
@@ -124,9 +134,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         //Manager del Sensor
 
-        sensorManager =(SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager =(SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mAccelerometer = mSensorManager.getDefaultSensor( Sensor.TYPE_ACCELEROMETER );
+        haveAccelerometer = mSensorManager.registerListener( mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_GAME );
+
+        mMagnetometer = mSensorManager.getDefaultSensor( Sensor.TYPE_MAGNETIC_FIELD );
+        haveMagnetometer = mSensorManager.registerListener( mSensorEventListener, mMagnetometer, SensorManager.SENSOR_DELAY_GAME );
+
+        if ( haveAccelerometer && haveMagnetometer ) {
+            // ready to go
+        } else {
+            // unregister and stop
+        }
         Log.d(TAG, "onCreate: Registered accelerometer listener");
 
 
@@ -290,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private void startTracking() {
         Intent intent1 = new Intent(MainActivity.this, BackgroundDetectedActivitiesService.class);
         startService(intent1);
-        Toast.makeText(this, "actividad" +":"+ ACTIVIDAD+" "+ "confianza" +CONFIANZA, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "actividad" +":"+ ACTIVIDAD+" "+ "confianza" +CONFIANZA + "azimuth: "+mAzimuth, Toast.LENGTH_SHORT).show();
 
 
     }
@@ -354,11 +373,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             final float velocidad = location.getSpeed();
             final String Actividad = ACTIVIDAD;
             final String Confianza = CONFIANZA;
+            final float azimuth = mAzimuth;
             Bundle extras = location.getExtras();
             String proveedor = location.getProvider();
 
-            locationTv.setText( "Latitud: " + latitud+ "\n  Longitud: " + location.getLongitude() + "\n Altitud: " + location.getAltitude()
-                    + "\n Velocidad: " + location.getSpeed()+ "\n Actividad: " + Actividad + "\n confianza: " + Confianza + "\n  onLocChange ");
+            locationTv.setText( "Latitud: " + latitud+ "\n  Longitud: " + longitud + "\n Altitud: " + location.getAltitude()
+                    + "\n Velocidad: " + location.getSpeed()+ "\n Actividad: " + Actividad + "\n confianza: " + Confianza + "\n  Azimuth: " + azimuth+ "\n  Fin ");
 
 
             writeNewLocation( UserId,latitud,longitud,altitud,velocidad,Actividad, Confianza);
@@ -425,15 +445,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 // funciones acelerometro
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        Log.d(TAG, "onSensorChanged: X: " + event.values[0] + "Y: " + event.values[1]+"Z: " + event.values[2]);
-        Toast.makeText(this , "onSensorChanged: X: " + event.values[0] + "Y: " + event.values[1]+"Z: " + event.values[2], Toast.LENGTH_LONG).show();
 
-    }
 
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
 }

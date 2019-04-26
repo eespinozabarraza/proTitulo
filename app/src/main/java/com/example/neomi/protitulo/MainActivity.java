@@ -373,15 +373,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             final float velocidad = location.getSpeed();
             final String Actividad = ACTIVIDAD;
             final String Confianza = CONFIANZA;
-            final float azimuth = mAzimuth;
+            final float Azimuth = mAzimuth;
             Bundle extras = location.getExtras();
             String proveedor = location.getProvider();
 
             locationTv.setText( "Latitud: " + latitud+ "\n  Longitud: " + longitud + "\n Altitud: " + location.getAltitude()
-                    + "\n Velocidad: " + location.getSpeed()+ "\n Actividad: " + Actividad + "\n confianza: " + Confianza + "\n  Azimuth: " + azimuth+ "\n  Fin ");
+                    + "\n Velocidad: " + location.getSpeed()+ "\n Actividad: " + Actividad + "\n confianza: " + Confianza + "\n  Azimuth: " + Azimuth+ "\n  Fin ");
 
 
-            writeNewLocation( UserId,latitud,longitud,altitud,velocidad,Actividad, Confianza);
+            writeNewLocation( UserId,latitud,longitud,altitud,velocidad,Actividad, Confianza, Azimuth);
 
 
         }
@@ -389,9 +389,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     public void writeNewLocation(String userId, double latitud, double longitud, double altitud, float velocidad,
-                                 String actividad, String confianza){
+                                 String actividad, String confianza, Float azimuth){
         String key = mDatabaseRef.push().getKey();
-        Ubicacion ubicacion = new Ubicacion(UserId, latitud,longitud,altitud,velocidad, actividad, confianza);
+        Ubicacion ubicacion = new Ubicacion(UserId, latitud,longitud,altitud,velocidad, actividad, confianza, azimuth);
         Map<String, Object> ubicacionValues = ubicacion.toMap();
 
         Map<String, Object> childUpdates = new HashMap<>();

@@ -13,12 +13,13 @@ public class Ubicacion {
     private float velocidad;
     private String actividad;
     private String confianza;
+    private Float azimuth;
     public int starCount = 0;
     public Map<String, Boolean> stars = new HashMap<>();
 
 
     public Ubicacion(String uid, double latitud, double longitud, double altura, float velocidad, String actividad,
-                     String confianza ) {
+                     String confianza, float azimuth ) {
         this.uid = uid;
         this.latitud = latitud;
         this.longitud = longitud;
@@ -26,6 +27,7 @@ public class Ubicacion {
         this.velocidad = velocidad;
         this.actividad = actividad;
         this.confianza = confianza;
+        this.azimuth = azimuth;
 
     }
 
@@ -39,6 +41,7 @@ public class Ubicacion {
         result.put("velocidad", velocidad);
         result.put("actividad",actividad);
         result.put("confianza",confianza);
+        result.put("azimuth", azimuth);
         result.put("starCount", starCount);
         result.put("stars", stars);
 
@@ -92,6 +95,10 @@ public class Ubicacion {
     public String getConfianza(){return confianza;}
 
     public void setConfianza(String confianza) {this.confianza = confianza;}
+
+    public Float getAzimuth(){return azimuth;}
+
+    public void setAzimuth(Float azimuth) {this.azimuth = azimuth;}
 
 
 }

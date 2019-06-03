@@ -1,71 +1,27 @@
 {
   "project_info": {
-    "project_number": "923607040324",
-    "firebase_url": "https://prototitulo.firebaseio.com",
-    "project_id": "prototitulo",
-    "storage_bucket": "prototitulo.appspot.com"
+    "project_number": "746462563481",
+    "firebase_url": "https://protituloproduccion.firebaseio.com",
+    "project_id": "protituloproduccion",
+    "storage_bucket": "protituloproduccion.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:923607040324:android:5aa7a02d34577ccc",
+        "mobilesdk_app_id": "1:746462563481:android:5aa7a02d34577ccc",
         "android_client_info": {
           "package_name": "com.example.neomi.protitulo"
         }
       },
       "oauth_client": [
         {
-          "client_id": "923607040324-92to99ggs5uh043lavp0sgmrokd25ppj.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.neomi.protitulo",
-            "certificate_hash": "c890b9ce491a74982adbf178d4e13ec6dc5e2272"
-          }
-        },
-        {
-          "client_id": "923607040324-hurv2gi4urnku4ppstk6ccj3v2f8h93k.apps.googleusercontent.com",
+          "client_id": "746462563481-9i71nak733qk3q6tc5hr7f23af3m2f1b.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBMMnNztycOCNmBCp2-bk2WLXnzpabIbAk"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "923607040324-hurv2gi4urnku4ppstk6ccj3v2f8h93k.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:923607040324:android:67216cb11629dacd",
-        "android_client_info": {
-          "package_name": "com.example.neomirc.protitulo"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "923607040324-hurv2gi4urnku4ppstk6ccj3v2f8h93k.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBMMnNztycOCNmBCp2-bk2WLXnzpabIbAk"
+          "current_key": "AIzaSyAnUYE_DWJV4V2mHq19wo89Lu9FK9AP-js"
         }
       ],
       "services": {

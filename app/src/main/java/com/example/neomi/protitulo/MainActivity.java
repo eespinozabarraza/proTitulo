@@ -55,14 +55,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         GoogleApiClient.OnConnectionFailedListener, LocationListener, GpsStatus.Listener {
 
     private DatabaseReference mDatabaseRef;
-
+//***
     private Location location;
     private TextView locationTv;
     private GoogleApiClient googleApiClient;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private LocationRequest locationRequest;
     private long UPDATE_INTERVAL = 10000, FASTES_INTERVAL = 10000; //1000 ms = 1 seg
-
+//***
     final String UserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     private static final String TAG = "Grabando Ubicacion";
 
@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Toast.makeText(this, "Estoy en pausa", Toast.LENGTH_LONG).show();
         googleApiClient.reconnect();
     }
-
+//*****
     private boolean checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
@@ -304,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return true;
 
     }
-
+//******
     //Reconocer Actividad de Usuario.
     private void handleUserActivity(int type, int confidence) {
         String label = getString(R.string.activity_unknown);
@@ -375,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     //fin reconocer actividad de usuario.
-
+//******
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -420,7 +420,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
-
+    //******
     @Override
     public void onLocationChanged(Location location) {
         if (location != null) {
@@ -463,7 +463,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         mDatabaseRef.updateChildren(childUpdates);
 
     }
-
+//******
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -499,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 break;
         }
     }
-
+    //******
     public void volverLogIn(View view) {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);

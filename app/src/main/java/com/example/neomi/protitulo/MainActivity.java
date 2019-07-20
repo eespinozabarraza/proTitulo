@@ -1,22 +1,28 @@
 package com.example.neomi.protitulo;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
+import android.location.GnssStatus;
 import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.Location;
-import android.location.GnssStatus;
+import android.location.LocationManager;
+import android.location.OnNmeaMessageListener;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -24,15 +30,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.os.Bundle;
 import android.widget.Toast;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.IntentFilter;
-import android.location.LocationManager;
-import android.location.OnNmeaMessageListener;
-import android.location.GnssMeasurementsEvent;
-
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -45,7 +43,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -53,9 +50,12 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener, GpsStatus.Listener {
-
+// Variables BD
     private DatabaseReference mDatabaseRef;
-//***
+    final String UserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private static final String TAG = "Grabando Ubicacion";
+
+// Variables Ubicacion
     private Location location;
     private TextView locationTv;
     private GoogleApiClient googleApiClient;
@@ -63,8 +63,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private LocationRequest locationRequest;
     private long UPDATE_INTERVAL = 10000, FASTES_INTERVAL = 10000; //1000 ms = 1 seg
 //***
-    final String UserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-    private static final String TAG = "Grabando Ubicacion";
+
 
     BroadcastReceiver broadcastReceiver;
 
@@ -90,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     GnssNavigationMessage.Callback mGnssNavMessageListener;
 
-
     // Variables Acelerometro y magnetometro
     private SensorEventListener mSensorEventListener = new SensorEventListener() {
         float[] gData = new float[3]; // accelerometer
@@ -104,9 +102,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-            float dimX = event.values[0];
-            float dimY = event.values[1];
-            float dimZ = event.values[2];
+
             float[] data;
             switch (event.sensor.getType()) {
                 case Sensor.TYPE_ACCELEROMETER:
@@ -121,6 +117,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             if (SensorManager.getRotationMatrix(rMat, iMat, gData, mData)) {
                 mAzimuth = (int) (Math.toDegrees(SensorManager.getOrientation(rMat, orientation)[0]) + 360) % 360;
+                dimX = event.values[0];
+                dimY = event.values[1];
+                dimZ = event.values[2];
             }
         }
     };
@@ -149,7 +148,37 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         locationTv = findViewById(R.id.location);
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+        // we add permissions we need to request location of the users
+        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+
+        permissionsToRequest = permissionsToRequest(permissions);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (permissionsToRequest.size() > 0) {
+                requestPermissions(permissionsToRequest.
+                        toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
+            }
+        }
+        googleApiClient = new GoogleApiClient.Builder(this).
+                addApi(LocationServices.API).
+                addConnectionCallbacks(this).
+                addOnConnectionFailedListener(this).build();
+
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(Constants.BROADCAST_DETECTED_ACTIVITY)) {
+                    int type = intent.getIntExtra("type", -1);
+                    int confidence = intent.getIntExtra("confidence", 0);
+                    handleUserActivity(type, confidence);
+                }
+            }
+
+        };
 
         //GPSSTATUS
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -203,35 +232,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         //fecha?//
 
 
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        // we add permissions we need to request location of the users
-        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
 
-        permissionsToRequest = permissionsToRequest(permissions);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (permissionsToRequest.size() > 0) {
-                requestPermissions(permissionsToRequest.
-                        toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
-            }
-        }
-        googleApiClient = new GoogleApiClient.Builder(this).
-                addApi(LocationServices.API).
-                addConnectionCallbacks(this).
-                addOnConnectionFailedListener(this).build();
-
-        broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getAction().equals(Constants.BROADCAST_DETECTED_ACTIVITY)) {
-                    int type = intent.getIntExtra("type", -1);
-                    int confidence = intent.getIntExtra("confidence", 0);
-                    handleUserActivity(type, confidence);
-                }
-            }
-
-        };
         startTracking();
 
     }
@@ -258,15 +259,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onStart() {
         super.onStart();
         startTracking();
+        //Ubicacion
         if (googleApiClient != null) {
             googleApiClient.connect();
         }
+        //
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        //Ubicacion
         googleApiClient.reconnect();
+        //
     }
 
     @Override
@@ -274,9 +279,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter(Constants.BROADCAST_DETECTED_ACTIVITY));
+        //Ubicacion
         if (!checkPlayServices()) {
             locationTv.setText("Necesitas instalar Google Play Services para usar la aplicacion");
         }
+        //
     }
 
     //para detener el proceso de recoleccion de datos (BORRAR DESPUES)
@@ -286,9 +293,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         startTracking();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
         Toast.makeText(this, "Estoy en pausa", Toast.LENGTH_LONG).show();
+        //Ubicacion
         googleApiClient.reconnect();
+        //
     }
-//*****
+// Ubicacion
     private boolean checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
@@ -304,7 +313,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return true;
 
     }
-//******
+//
     //Reconocer Actividad de Usuario.
     private void handleUserActivity(int type, int confidence) {
         String label = getString(R.string.activity_unknown);
@@ -521,17 +530,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             int i = 0;
             while (sat.hasNext()) {
                 GpsSatellite satellite = sat.next();
-                lSatellites = "Satellite" + (i++) + ": "
-                        + satellite.getPrn() + ","
-                        + satellite.usedInFix() + ","
-                        + satellite.getSnr() + ","
-                        + satellite.getAzimuth() + ","
-                        + satellite.getElevation()+ "\n\n";
+                if(satellite.usedInFix()==true){
+                    lSatellites = "Satellite" + (i++) + ": "
+                            + satellite.getPrn() + ","
+                            + satellite.usedInFix() + ","
+                            + satellite.getSnr() + ","
+                            + satellite.getAzimuth() + ","
+                            + satellite.getElevation()+ "\n\n";
 
-                Toast.makeText(this, "SATELLITE :" + lSatellites, Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "SATELLITE :" + lSatellites, Toast.LENGTH_LONG).show();
+                }
+
             }
         }else{
-            lSatellites = "Estoy aca";
+            lSatellites = "No es posible acceder a los satelites";
         }return;
 
 

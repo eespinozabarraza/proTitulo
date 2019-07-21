@@ -43,7 +43,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private DatabaseReference mDatabaseRef;
     final String UserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
     private static final String TAG = "Grabando Ubicacion";
+    DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy, HH:mm");
 
 // Variables Ubicacion
     private Location location;
@@ -445,24 +449,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             final float Z = dimZ;
             Bundle extras = location.getExtras();
             String proveedor = location.getProvider();
+            String date = df.format(Calendar.getInstance().getTime());
             String CantSatelites = String.valueOf(satelliteCount);
 
-            locationTv.setText("Latitud: " + latitud + "\n  Longitud: " + longitud + "\n Altitud: " + location.getAltitude()
-                    + "\n Velocidad: " + location.getSpeed() + "\n Actividad: " + Actividad + "\n confianza: " + Confianza + "\n  " +
-                    "Azimuth: " + Azimuth + "\n X : " + X + "\n Y : " + Y + "\n Z : " + Z + "\n  \"SATELLITE:" + CantSatelites + "\n  Fin ");
+            locationTv.setText(String.format
+                    ("Latitud: %s\n  Longitud: %s\n Altitud: %s\n Velocidad: %s\n Actividad: %s\n confianza: %s\n Azimuth: %s\n X : %s\n Y : %s\n Z : %s\n SATELLITE:%s\n  Fecha: %s\n FIN",
+                    latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date));
 
 
-            writeNewLocation(UserId, latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth);
+            writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z);
 
 
         }
 
     }
 
-    public void writeNewLocation(String userId, double latitud, double longitud, double altitud, float velocidad,
-                                 String actividad, String confianza, Float azimuth) {
+    public void writeNewLocation(String userId, String date, double latitud, double longitud, double altitud, float velocidad,
+                                 String actividad, String confianza, float azimuth, float X, float Y, float Z) {
         String key = mDatabaseRef.push().getKey();
-        Ubicacion ubicacion = new Ubicacion(UserId, latitud, longitud, altitud, velocidad, actividad, confianza, azimuth);
+        Ubicacion ubicacion = new Ubicacion(UserId, date, latitud, longitud, altitud, velocidad, actividad, confianza, azimuth,X,Y,Z);
         Map<String, Object> ubicacionValues = ubicacion.toMap();
 
         Map<String, Object> childUpdates = new HashMap<>();

@@ -1,39 +1,37 @@
 {
   "project_info": {
-    "project_number": "746462563481",
-    "firebase_url": "https://protituloproduccion.firebaseio.com",
-    "project_id": "protituloproduccion",
-    "storage_bucket": "protituloproduccion.appspot.com"
+    "project_number": "708723936327",
+    "firebase_url": "https://protitulo-1e097.firebaseio.com",
+    "project_id": "protitulo-1e097",
+    "storage_bucket": "protitulo-1e097.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:746462563481:android:5aa7a02d34577ccc",
+        "mobilesdk_app_id": "1:708723936327:android:5aa7a02d34577ccc",
         "android_client_info": {
           "package_name": "com.example.neomi.protitulo"
         }
       },
       "oauth_client": [
         {
-          "client_id": "746462563481-9i71nak733qk3q6tc5hr7f23af3m2f1b.apps.googleusercontent.com",
+          "client_id": "708723936327-pbga59b3mo4ft5t8gcn1vobmcjtab2f1.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAnUYE_DWJV4V2mHq19wo89Lu9FK9AP-js"
+          "current_key": "AIzaSyA8UqVvJmSvtM941rq2WAD81l-MdmwPPjw"
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
+          "other_platform_oauth_client": [
+            {
+              "client_id": "708723936327-pbga59b3mo4ft5t8gcn1vobmcjtab2f1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

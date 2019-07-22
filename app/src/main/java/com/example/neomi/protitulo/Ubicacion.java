@@ -14,7 +14,7 @@ public class Ubicacion {
     private float velocidad;
     private String actividad;
     private String confianza;
-    private float azimuth;
+    private float mazimuth;
     private float X;
     private float Y;
     private float Z;
@@ -23,7 +23,7 @@ public class Ubicacion {
 
 
     public Ubicacion(String uid , String date, double latitud, double longitud, double altura, float velocidad, String actividad,
-                     String confianza, float azimuth,float X, float Y, float Z ) {
+                     String confianza, float mazimuth,float X, float Y, float Z ) {
         this.uid = uid;
         this.date = date;
         this.latitud = latitud;
@@ -32,7 +32,7 @@ public class Ubicacion {
         this.velocidad = velocidad;
         this.actividad = actividad;
         this.confianza = confianza;
-        this.azimuth = azimuth;
+        this.mazimuth = mazimuth;
         this.X = X;
         this.Y = Y;
         this.Z = Z;
@@ -50,7 +50,7 @@ public class Ubicacion {
         result.put("velocidad", velocidad);
         result.put("actividad",actividad);
         result.put("confianza",confianza);
-        result.put("azimuth", azimuth);
+        result.put("azimuth", mazimuth);
         result.put("X", X);
         result.put("Y", Y);
         result.put("Z", Z);
@@ -112,9 +112,9 @@ public class Ubicacion {
 
     public void setConfianza(String confianza) {this.confianza = confianza;}
 
-    public float getAzimuth(){return azimuth;}
+    public float getAzimuth(){return mazimuth;}
 
-    public void setAzimuth(Float azimuth) {this.azimuth = azimuth;}
+    public void setAzimuth(Float azimuth) {this.mazimuth = azimuth;}
 
     public float getX(){return X;}
 

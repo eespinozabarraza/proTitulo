@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -18,11 +19,14 @@ import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.location.OnNmeaMessageListener;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
@@ -62,7 +66,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 // Variables Ubicacion
     private Location location;
     private TextView locationTv;
-    private TextView SatelitesLista;
     private GoogleApiClient googleApiClient;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private LocationRequest locationRequest;
@@ -74,25 +77,33 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private String ACTIVIDAD, CONFIANZA;
     // variable GPSStatus
-    LocationManager locationManager = null;
+    LocationManager mLocationManager;
     String lSatellites = null;
 
-    // variables GnssStatus
+    //
 
     // Variables Satellite
-    LocationManager mLocationManager;
+
     /**
+     * Variables GnssStatus
      * Android N (7.0) and above status and listeners
      */
-    GnssStatus mGnssStatus;
-    ArrayList<String> Satelites;
 
-    GnssStatus.Callback mGnssStatusCallback;
+    private LocationProvider mProvider;
+    GnssStatus mGnssStatus;
+    GnssStatus.Callback mGnssStatusListener;
+    public ArrayList<Satellite> satellites ;
+    private boolean gpsPermissionGranted = false;
+    private SharedPreferences sharedPreferences;
+    private Context context;
+    private long minTime; // Min Time between location updates, in milliseconds
+    private float minDistance; // Min Distance between location updates, in meters
+    int satelliteCount;
+
+
 
     GnssMeasurementsEvent.Callback mGnssMeasurementsListener;
-
     OnNmeaMessageListener mOnNmeaMessageListener;
-
     GnssNavigationMessage.Callback mGnssNavMessageListener;
 
     // Variables Acelerometro y magnetometro
@@ -138,7 +149,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private Sensor mMagnetometer;
     boolean haveAccelerometer = false;
     boolean haveMagnetometer = false;
-    int satCount;
 
     //lista de presmisos.
 
@@ -185,15 +195,33 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         };
 
-        //GPSSTATUS
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        //GNSSSTATUS
+        context = getApplicationContext();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        mProvider = mLocationManager.getProvider(LocationManager.GPS_PROVIDER);
+        if (mProvider == null) {
+            Log.e(TAG, "Unable to get GPS_PROVIDER");
+            return;
+        }
+        gpsPermissionGranted = Constants.preMarshmallow;
+
+        // set the min time and distance for the location manager
+
+        minTime = Constants.DETECTION_INTERVAL_IN_MILLISECONDS;
+        LocationRequest mLocationRequest = new LocationRequest();
+        minDistance = mLocationRequest.getSmallestDisplacement();
+        addGnssStatusListener();
+
+/**
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             mGnssStatusCallback = new GnssStatus.Callback() {
                 @Override
                 public void onSatelliteStatusChanged(GnssStatus status) {
 
-                    satCount = status.getSatelliteCount();
+                    int sateliteCount = status.getSatelliteCount();
                 }
             };
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -212,6 +240,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
 
+ **/
 
 
 
@@ -238,12 +267,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
         startTracking();
-        Satelites = (ArrayList<String>) getIntent().getSerializableExtra("satelite");
 
+      // ListaSatellite.findViewById(R.id.SateliteListVew);
 
-
-       // SatelitesLista.findViewById(R.id.SateliteListVew);
-       // for(String Sat:Satelites) SatelitesLista.append(Sat, Satelites);
+      // for(String "Sat":satellites) ListaSatellite.addView("Sat", satellites);
 
 
     }
@@ -274,6 +301,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (googleApiClient != null) {
             googleApiClient.connect();
         }
+        addGnssStatusListener();
         //
     }
 
@@ -385,8 +413,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Intent intent1 = new Intent(MainActivity.this, BackgroundDetectedActivitiesService.class);
         startService(intent1);
         Toast.makeText(this, "actividad" + ":" + ACTIVIDAD + " " + "confianza" + CONFIANZA + "azimuth: " + mAzimuth, Toast.LENGTH_SHORT).show();
-        Intent intent2 = new Intent(MainActivity.this,GPSService.class);
-        startService(intent2);
+
 
     }
 
@@ -406,7 +433,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
         location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        locationManager.addGpsStatusListener(this);
+        mLocationManager.addGpsStatusListener(this);
         if (location != null) {
             Toast.makeText(this, "Bienvenido al sistema", Toast.LENGTH_LONG).show();
         } else {
@@ -458,11 +485,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             Bundle extras = location.getExtras();
             String proveedor = location.getProvider();
             String date = df.format(Calendar.getInstance().getTime());
-            String CantSatelites = String.valueOf(satCount);
+            String CantSatelites = String.valueOf(satelliteCount);
+            String CantLista = satellites.toString();
+
 
             locationTv.setText(String.format
-                    ("Latitud: %s\n  Longitud: %s\n Altitud: %s\n Velocidad: %s\n Actividad: %s\n confianza: %s\n Azimuth: %s\n X : %s\n Y : %s\n Z : %s\n SATELLITE:%s\n  Fecha: %s\n FIN",
-                    latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date));
+                    ("Latitud: %s\n  Longitud: %s\n Altitud: %s\n Velocidad: %s\n Actividad: %s\n confianza: %s\n Azimuth: %s\n X : %s\n Y : %s\n Z : %s\n SATELLITE:%s\n  Fecha: %s\n CantidadLista: %s",
+                    latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date, CantLista));
 
 
             writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z);
@@ -535,7 +564,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             return;
-        GpsStatus gpsStatus = locationManager.getGpsStatus(null);
+        GpsStatus gpsStatus = mLocationManager.getGpsStatus(null);
         if(gpsStatus != null) {
             Iterable<GpsSatellite>satellites = gpsStatus.getSatellites();
             Iterator<GpsSatellite> sat = satellites.iterator();
@@ -564,6 +593,44 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 // funciones acelerometro
+
+// Funcion que incia GnssStatus
+    public void addGnssStatusListener() {mGnssStatusListener = new GnssStatus.Callback() {
+             @Override
+             public void onSatelliteStatusChanged(GnssStatus status) {
+                             mGnssStatus = status;
+                             satelliteCount = mGnssStatus.getSatelliteCount();
+                             satellites = new ArrayList<>();
+                             for (int i = 0; i < satelliteCount; i++)
+                                 satellites.add(getSatellite(mGnssStatus, i));
+             }
+
+    };
+    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        // TODO: Consider calling
+        //    ActivityCompat#requestPermissions
+        // here to request the missing permissions, and then overriding
+        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+        //                                          int[] grantResults)
+        // to handle the case where the user grants the permission. See the documentation
+        // for ActivityCompat#requestPermissions for more details.
+        return;
+    }
+    mLocationManager.registerGnssStatusCallback(mGnssStatusListener);
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    // populate a new satellite from gnss status
+    private Satellite getSatellite(GnssStatus mGnssStatus, int i) {
+        float azimuth = mGnssStatus.getAzimuthDegrees(i);
+        float elevation = mGnssStatus.getElevationDegrees(i);
+        float snr = mGnssStatus.getCn0DbHz(i);
+        int prn = mGnssStatus.getSvid(i);
+        boolean used = mGnssStatus.usedInFix(i);
+        int type = mGnssStatus.getConstellationType(i);
+        return (new Satellite(azimuth, elevation, snr, prn, used, type));
+    }
+
 
 
 }

@@ -2,6 +2,7 @@ package com.example.neomi.protitulo;
 
 import com.google.firebase.database.Exclude;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,12 +19,14 @@ public class Ubicacion {
     private float X;
     private float Y;
     private float Z;
+    private int CantSat;
+    private ArrayList<Satellite> listaSatelites;
     public int starCount = 0;
     public Map<String, Boolean> stars = new HashMap<>();
 
 
-    public Ubicacion(String uid , String date, double latitud, double longitud, double altura, float velocidad, String actividad,
-                     String confianza, float mazimuth,float X, float Y, float Z ) {
+    public Ubicacion(String uid, String date, double latitud, double longitud, double altura, float velocidad, String actividad,
+                     String confianza, float mazimuth, float X, float Y, float Z, int CantSat, ArrayList<Satellite> listaSatelites) {
         this.uid = uid;
         this.date = date;
         this.latitud = latitud;
@@ -36,7 +39,8 @@ public class Ubicacion {
         this.X = X;
         this.Y = Y;
         this.Z = Z;
-
+        this.CantSat = CantSat;
+        this.listaSatelites = listaSatelites;
     }
 
     @Exclude
@@ -54,55 +58,37 @@ public class Ubicacion {
         result.put("X", X);
         result.put("Y", Y);
         result.put("Z", Z);
+        result.put("CantSat", CantSat);
         result.put("starCount", starCount);
         result.put("stars", stars);
+        result.put("listaSatelite", listaSatelites);
 
         return result;
     }
 
-    public String getUid() {
-        return uid;
-    }
+    public String getUid() {return uid;}
 
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
+    public void setUid(String uid) {this.uid = uid;}
 
     public String getDate(){return date;}
 
     public void setDate (String date) {this.date = date;}
 
-    public double getLatitud() {
-        return latitud;
-    }
+    public double getLatitud() {        return latitud;    }
 
-    public void setLatitud(double latitud) {
-        this.latitud = latitud;
-    }
+    public void setLatitud(double latitud) {        this.latitud = latitud;    }
 
-    public double getLongitud() {
-        return longitud;
-    }
+    public double getLongitud() {        return longitud;    }
 
-    public void setLongitud(double longitud) {
-        this.longitud = longitud;
-    }
+    public void setLongitud(double longitud) {        this.longitud = longitud;    }
 
-    public double getAltura() {
-        return altura;
-    }
+    public double getAltura() {        return altura;    }
 
-    public void setAltura(double altura) {
-        this.altura = altura;
-    }
+    public void setAltura(double altura) {        this.altura = altura;    }
 
-    public float getVelocidad() {
-        return velocidad;
-    }
+    public float getVelocidad() {        return velocidad;    }
 
-    public void setVelocidad(float velocidad) {
-        this.velocidad = velocidad;
-    }
+    public void setVelocidad(float velocidad) {        this.velocidad = velocidad;    }
 
     public String getActividad() {return actividad; }
 
@@ -128,6 +114,12 @@ public class Ubicacion {
 
     public void setZ(float Z) {this.Z = Z;}
 
+    public int getCantSat() {        return CantSat;    }
 
+    public void setCantSat(int CantSat) {        this.CantSat = CantSat;    }
+
+    public ArrayList<Satellite> getlistaSatelites() {        return listaSatelites;    }
+
+    public void setlistaSatelites(ArrayList<Satellite> listaSatelites) {        this.listaSatelites = listaSatelites;    }
 }
 

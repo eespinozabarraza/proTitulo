@@ -482,19 +482,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             final float X = dimX;
             final float Y = dimY;
             final float Z = dimZ;
-            Bundle extras = location.getExtras();
-            String proveedor = location.getProvider();
             String date = df.format(Calendar.getInstance().getTime());
-            String CantSatelites = String.valueOf(satelliteCount);
-            String CantLista = satellites.toString();
+            int CantSatelites = satelliteCount;
+            String ListaSatellite = satellites.toString();
+            ArrayList<Satellite> Sat = satellites;
 
 
             locationTv.setText(String.format
                     ("Latitud: %s\n  Longitud: %s\n Altitud: %s\n Velocidad: %s\n Actividad: %s\n confianza: %s\n Azimuth: %s\n X : %s\n Y : %s\n Z : %s\n SATELLITE:%s\n  Fecha: %s\n CantidadLista: %s",
-                    latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date, CantLista));
+                    latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date, ListaSatellite));
 
 
-            writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z);
+            writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, satellites);
 
 
         }
@@ -502,9 +501,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     public void writeNewLocation(String userId, String date, double latitud, double longitud, double altitud, float velocidad,
-                                 String actividad, String confianza, float azimuth, float X, float Y, float Z) {
+                                 String actividad, String confianza, float azimuth, float X, float Y, float Z, int cantSat, ArrayList<Satellite> listaSatelites) {
         String key = mDatabaseRef.push().getKey();
-        Ubicacion ubicacion = new Ubicacion(UserId, date, latitud, longitud, altitud, velocidad, actividad, confianza, azimuth,X,Y,Z);
+        Ubicacion ubicacion = new Ubicacion(UserId, date, latitud, longitud, altitud, velocidad, actividad, confianza, azimuth,X,Y,Z, cantSat, listaSatelites);
         Map<String, Object> ubicacionValues = ubicacion.toMap();
 
         Map<String, Object> childUpdates = new HashMap<>();

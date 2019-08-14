@@ -418,8 +418,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private void stopTracking() {
-        Intent intent = new Intent(MainActivity.this, BackgroundDetectedActivitiesService.class);
-        stopService(intent);
+        Intent intent1 = new Intent(MainActivity.this, BackgroundDetectedActivitiesService.class);
+        stopService(intent1);
     }
 
     //fin reconocer actividad de usuario.
@@ -591,7 +591,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
-// funciones acelerometro
+
 
 // Funcion que incia GnssStatus
     public void addGnssStatusListener() {mGnssStatusListener = new GnssStatus.Callback() {

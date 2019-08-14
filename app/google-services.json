@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "708723936327-d465uujbf3c72pikofein4pef9i5qg9j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.neomi.protitulo",
+            "certificate_hash": "b17246afd041ea96f50900f670d8168191f68219"
+          }
+        },
+        {
           "client_id": "708723936327-pbga59b3mo4ft5t8gcn1vobmcjtab2f1.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -549,7 +549,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 break;
         }
     }
-    //******
+  
     public void volverLogIn(View view) {
         Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);

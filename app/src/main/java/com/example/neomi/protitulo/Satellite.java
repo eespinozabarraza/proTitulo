@@ -1,5 +1,8 @@
 package com.example.neomi.protitulo;
+
 import android.location.GnssStatus;
+
+
 
 public class Satellite {
     private float azimuth = 0.0f;
@@ -17,8 +20,8 @@ public class Satellite {
 
     @Override
     public String toString() {
-        return "(  " + "PRN: " + prn + " AZM: " + azimuth + " ALT: " + elevation + " SNR: " + snr +
-                " in use: " + used  + " Type: " + type + "  )";
+        return "(" + "PRN: " + prn + " AZM: " + azimuth + " ALT: " + elevation + " SNR: " + snr +
+                " in use: " + used  + " Type: " + type + ")";
     }
 
     Satellite (float azimuth, float elevation, float snr, int prn, boolean used) {
@@ -133,11 +136,15 @@ public class Satellite {
     }
 
     public void setSignalStrength() {
+        signalStrength = setSatSignalStrength(snr);
+    }
+    public static int setSatSignalStrength(float snr) {
         int signalStrength = 0;
         if ( (25 < snr)  ) signalStrength = 4;
         if ( (15 < snr) && (snr <= 25) ) signalStrength = 3;
         if ( (10 < snr) && (snr <= 15) ) signalStrength = 2;
         if ( (0 <= snr ) && (snr <= 10) ) signalStrength = 1;
+        return signalStrength;
     }
     public int getSignalStrength() {
         return signalStrength;

@@ -2,6 +2,11 @@ package com.example.neomi.protitulo;
 
 public class NmeaManager {
     String[] nmeaParts;
+
+    public NmeaManager() {
+
+    }
+
     public static boolean IsNullOrEmpty(String text){
         return text == null ||  text.trim().length() == 0;
     }

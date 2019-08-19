@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private float minDistance; // Min Distance between location updates, in meters
     int satelliteCount;
 
+    NmeaManager mNmeaManager;
     public String nmea;
     public String Hdop;
     public String Vdop;
@@ -551,12 +552,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void addNameaStatusListener(){
+        Hdop = "";
+        Vdop = "";
+        Pdop = "";
+        geoIdH = "";
+        ageOfData = "";
+        dGpsId = "";
+        mNmeaManager = new NmeaManager();
         mOnNmeaMessageListener = new OnNmeaMessageListener() {
             @Override
             public void onNmeaMessage(String message, long timestamp) {
                 nmea = "NMEA: " + message;
             }
         };
+
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions

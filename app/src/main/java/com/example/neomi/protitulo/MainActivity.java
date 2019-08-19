@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private float minDistance; // Min Distance between location updates, in meters
     int satelliteCount;
 
-    NmeaManager mNmeaManager;
+
     public String nmea;
     public String Hdop;
     public String Vdop;
@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public String geoIdH;
     public String ageOfData;
     public String dGpsId;
+
 
     GnssMeasurementsEvent.Callback mGnssMeasurementsListener;
     OnNmeaMessageListener mOnNmeaMessageListener;
@@ -132,15 +133,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     mData = event.values.clone();
                     break;
                 case Sensor.TYPE_AMBIENT_TEMPERATURE:
-                    tipo = 1;
+                    tData = event.values.clone();
                     break;
                 default:
                     return;
             }
-            if (tipo == 1) {
-                tData = event.values[0];
-            } else
-                temp = "sin sensor de temperatura";
+            if (mTemperature != null) {
+                temp = event.values[0];
+            }else{
+                temp = -273;
+            }
+
             if (SensorManager.getRotationMatrix(rMat, iMat, gData, mData)) {
                 mAzimuth = (int) (Math.toDegrees(SensorManager.getOrientation(rMat, orientation)[0]) + 360) % 360;
                 dimX = event.values[0];
@@ -153,17 +156,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private float dimX;
     private float dimY;
     private float dimZ;
-    private String temp;
-    private int tipo = 0;
-    float tData;
+    private float temp;
+    float[] tData = new float[5];
     float[] gData = new float[3]; // accelerometer
     float[] mData = new float[3]; // magnetometer
     float[] rMat = new float[9];
     float[] iMat = new float[9];
     float[] orientation = new float[3];
-    private SensorManager mSensorManager = null;
+    private SensorManager mSensorManager;
     private Sensor mAccelerometer;
     private Sensor mMagnetometer;
+    private Sensor mTemperature;
     boolean haveAccelerometer = false;
     boolean haveMagnetometer = false;
 
@@ -234,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mTemperature = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
         haveAccelerometer = mSensorManager.registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
 
         mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -394,16 +398,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             final float X = dimX;
             final float Y = dimY;
             final float Z = dimZ;
-            final String temperatura = nmea;
+            final String Nmea = nmea;
             String date = df.format(Calendar.getInstance().getTime());
             int CantSatelites = satelliteCount;
             String ListaSatellite = satellites.toString();
             ArrayList<Satellite> Sat = satellites;
-
+            String hdop = Hdop;
+            String vdop = Vdop;
+            String pdop = Pdop;
+            String temperatura = Float.toString(temp);
 
             locationTv.setText(String.format
-                    ("Latitud: %s\n  Longitud: %s\n Altitud: %s\n Velocidad: %s\n Actividad: %s\n confianza: %s\n Azimuth: %s\n X : %s\n Y : %s\n Z : %s\n SATELLITE:%s\n  Fecha: %s\n Temperatura: %s\n CantidadLista: %s",
-                            latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date, temperatura, ListaSatellite));
+                    ("Latitud: %s\n  Longitud: %s\n Altitud: %s\n Velocidad: %s\n Actividad: %s\n confianza: %s\n Azimuth: %s\n X : %s\n Y : %s\n Z : %s\n SATELLITE:%s\n  " +
+                                    "Fecha: %s\n NMEA: %s\n Hdop : %s\n Vdop : %s\n Pdop : %s\n Temperatura :%s\n CantidadLista: %s",
+                            latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date, Nmea,hdop,vdop,pdop,temperatura, ListaSatellite));
 
 
             writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, satellites);
@@ -522,8 +530,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
         if (confidence > Constants.CONFIDENCE) {
-            ACTIVIDAD = new String(label);
-            CONFIANZA = new String(confidence + "%");
+            ACTIVIDAD = label;
+            CONFIANZA = confidence + "%";
         }
 
     }
@@ -552,19 +560,78 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void addNameaStatusListener(){
-        Hdop = "";
-        Vdop = "";
-        Pdop = "";
         geoIdH = "";
         ageOfData = "";
         dGpsId = "";
-        mNmeaManager = new NmeaManager();
+
+
         mOnNmeaMessageListener = new OnNmeaMessageListener() {
             @Override
             public void onNmeaMessage(String message, long timestamp) {
-                nmea = "NMEA: " + message;
+                nmea = message;
+                String[] tokens = nmea.split(",");
+                boolean isGGA = tokens[0].toUpperCase().contains("GGA");
+                boolean isGSA = tokens[0].toUpperCase().contains("GSA");
+                if (isGSA) {
+
+                    if (tokens.length > 15 && !IsNullOrEmpty(tokens[15])) {
+                        Pdop = tokens[15];
+                    }
+                }
+                if (isGGA) {
+                    if (tokens.length > 8 &&!IsNullOrEmpty(tokens[8])) {
+                        Hdop = tokens[8];
+                    }
+                }
+                else if (isGSA) {
+                    if (tokens.length > 16 &&!IsNullOrEmpty(tokens[16])) {
+                        Hdop = tokens[16];
+                    }
+                }
+                if (isGSA) {
+                    if (tokens.length > 17 &&!IsNullOrEmpty(tokens[17])) {
+                        if (tokens[17].contains("*")) {
+                            String VdopAux = tokens[17].split("\\*")[0];
+                            Vdop = VdopAux;
+                        }else{
+                            Vdop = tokens[17];
+                        }
+
+                    }else{
+                        Vdop = "hola";
+                    }
+                }
+
+/**
+                if (nmea.startsWith("$GNGSA") || nmea.startsWith("$GPGSA")) {
+                    try {
+                        Pdop = Float.valueOf(tokens[15]);
+                        Hdop = Float.valueOf(tokens[16]);
+                        if (tokens[17].contains("*")) {
+                            String VdopAux = tokens[17].split("\\*")[0];
+                            Vdop = Float.valueOf(VdopAux);
+                        }else{
+                            Vdop = Float.valueOf(tokens[17]);
+                        }
+
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        Log.e(TAG, "Bad NMEA message for parsing DOP - " + nmea + " :" + e);
+                        }
+
+                    // See https://github.com/barbeau/gpstest/issues/71#issuecomment-263169174
+
+
+
+                } else {
+                    Log.w(TAG, "Input must be a $GNGSA NMEA: " + nmea);
+
+                }**/
+               }
+            public boolean IsNullOrEmpty(String text){
+                return text == null ||  text.trim().length() == 0;
             }
         };
+
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -579,6 +646,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         mLocationManager.addNmeaListener(mOnNmeaMessageListener);
     }
+
 
 
 

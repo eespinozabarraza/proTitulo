@@ -104,8 +104,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public String Vdop;
     public String Pdop;
     public String geoIdH;
-    public String ageOfData;
-    public String dGpsId;
+    public String ageOfData = "DGPS not in use";
+    public String antenaAltitud;
 
 
     GnssMeasurementsEvent.Callback mGnssMeasurementsListener;
@@ -398,7 +398,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             final float X = dimX;
             final float Y = dimY;
             final float Z = dimZ;
-            final String Nmea = nmea;
             String date = df.format(Calendar.getInstance().getTime());
             int CantSatelites = satelliteCount;
             String ListaSatellite = satellites.toString();
@@ -406,12 +405,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             String hdop = Hdop;
             String vdop = Vdop;
             String pdop = Pdop;
+            String ageofData =ageOfData;
+            String geoidalSeparation = geoIdH;
+            String antenaAlt = antenaAltitud;
             String temperatura = Float.toString(temp);
 
             locationTv.setText(String.format
                     ("Latitud: %s\n  Longitud: %s\n Altitud: %s\n Velocidad: %s\n Actividad: %s\n confianza: %s\n Azimuth: %s\n X : %s\n Y : %s\n Z : %s\n SATELLITE:%s\n  " +
-                                    "Fecha: %s\n NMEA: %s\n Hdop : %s\n Vdop : %s\n Pdop : %s\n Temperatura :%s\n CantidadLista: %s",
-                            latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date, Nmea,hdop,vdop,pdop,temperatura, ListaSatellite));
+                                    "Fecha: %s\n Hdop : %s\n Vdop : %s\n Pdop : %s\n ageOfData: %s\n geoidalSeparation: %s\n AntenaAltitud: %s\n Temperatura :%s\n CantidadLista: %s",
+                            latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date,hdop,vdop,pdop,ageofData,geoidalSeparation,antenaAlt,temperatura, ListaSatellite));
 
 
             writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, satellites);
@@ -560,11 +562,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void addNameaStatusListener(){
-        geoIdH = "";
-        ageOfData = "";
-        dGpsId = "";
-
-
         mOnNmeaMessageListener = new OnNmeaMessageListener() {
             @Override
             public void onNmeaMessage(String message, long timestamp) {
@@ -575,17 +572,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 if (isGSA) {
 
                     if (tokens.length > 15 && !IsNullOrEmpty(tokens[15])) {
-                        Pdop = tokens[15];
+                        if (tokens[15]== null){
+                            Pdop = "Not Valid";
+                        }else{
+                            Pdop = tokens[15];
+                        }
                     }
                 }
                 if (isGGA) {
                     if (tokens.length > 8 &&!IsNullOrEmpty(tokens[8])) {
-                        Hdop = tokens[8];
+                        if (tokens[8]== null){
+                            Hdop = "Not Valid";
+                        }else{
+                            Hdop = tokens[8];
+                        }
+
                     }
                 }
                 else if (isGSA) {
                     if (tokens.length > 16 &&!IsNullOrEmpty(tokens[16])) {
-                        Hdop = tokens[16];
+                        if (tokens[16]== null){
+                            Hdop = "Not Valid";
+                        }else{
+                            Hdop = tokens[16];
+                        }
                     }
                 }
                 if (isGSA) {
@@ -597,35 +607,32 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             Vdop = tokens[17];
                         }
 
-                    }else{
-                        Vdop = "hola";
+                    }
+                }
+                if (isGGA) {
+                    if (tokens.length > 11 &&!IsNullOrEmpty(tokens[11])) {
+                        geoIdH = tokens[11];
                     }
                 }
 
-/**
-                if (nmea.startsWith("$GNGSA") || nmea.startsWith("$GPGSA")) {
-                    try {
-                        Pdop = Float.valueOf(tokens[15]);
-                        Hdop = Float.valueOf(tokens[16]);
-                        if (tokens[17].contains("*")) {
-                            String VdopAux = tokens[17].split("\\*")[0];
-                            Vdop = Float.valueOf(VdopAux);
-                        }else{
-                            Vdop = Float.valueOf(tokens[17]);
-                        }
+                if (isGGA) {
+                    if (tokens.length > 13 && !IsNullOrEmpty(tokens[13])) {
+                        ageOfData = tokens[13];
+                    }else{
+                        ageOfData = "DGPS not in use";
+                    }
+                }
 
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        Log.e(TAG, "Bad NMEA message for parsing DOP - " + nmea + " :" + e);
-                        }
+                if (isGGA) {
+                    if (tokens.length > 9 &&!IsNullOrEmpty(tokens[9])) {
 
-                    // See https://github.com/barbeau/gpstest/issues/71#issuecomment-263169174
+                            antenaAltitud = tokens[9];
 
 
+                    }
+                }
 
-                } else {
-                    Log.w(TAG, "Input must be a $GNGSA NMEA: " + nmea);
 
-                }**/
                }
             public boolean IsNullOrEmpty(String text){
                 return text == null ||  text.trim().length() == 0;

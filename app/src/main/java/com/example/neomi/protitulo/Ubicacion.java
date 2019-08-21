@@ -21,12 +21,21 @@ public class Ubicacion {
     private float Z;
     private int CantSat;
     private ArrayList<Satellite> listaSatelites;
+
+    private double positionDop;
+    private double horizontalDop;
+    private double verticalDop;
+    private String geoidHeight;
+    private String ageOfGpsData;
+    private String antennaAltitude;
+    private String temperatura;
+
     public int starCount = 0;
     public Map<String, Boolean> stars = new HashMap<>();
 
 
     public Ubicacion(String uid, String date, double latitud, double longitud, double altura, float velocidad, String actividad,
-                     String confianza, float mazimuth, float X, float Y, float Z, int CantSat, ArrayList<Satellite> listaSatelites) {
+                     String confianza, float mazimuth, float X, float Y, float Z, int CantSat, double positionDop, double horizontalDop, double verticalDop, String geoidHeight, String ageOfGpsData, String antennaAltitude, ArrayList<Satellite> listaSatelites, String temperatura) {
         this.uid = uid;
         this.date = date;
         this.latitud = latitud;
@@ -40,7 +49,14 @@ public class Ubicacion {
         this.Y = Y;
         this.Z = Z;
         this.CantSat = CantSat;
+        this.positionDop = positionDop;
+        this.horizontalDop = horizontalDop;
+        this.verticalDop = verticalDop;
+        this.geoidHeight = geoidHeight;
+        this.ageOfGpsData = ageOfGpsData;
+        this.antennaAltitude = antennaAltitude;
         this.listaSatelites = listaSatelites;
+        this.temperatura = temperatura;
     }
 
     @Exclude
@@ -61,7 +77,14 @@ public class Ubicacion {
         result.put("CantSat", CantSat);
         result.put("starCount", starCount);
         result.put("stars", stars);
+        result.put("positionDop",positionDop);
+        result.put("horizontalDop",horizontalDop);
+        result.put("verticalDop",verticalDop);
+        result.put("geoidHeight",geoidHeight);
+        result.put("ageOfGpsData",ageOfGpsData);
+        result.put("antennaAltitude",antennaAltitude);
         result.put("listaSatelite", listaSatelites);
+        result.put("temperatura", temperatura);
 
         return result;
     }
@@ -121,5 +144,62 @@ public class Ubicacion {
     public ArrayList<Satellite> getlistaSatelites() {        return listaSatelites;    }
 
     public void setlistaSatelites(ArrayList<Satellite> listaSatelites) {        this.listaSatelites = listaSatelites;    }
+
+
+    public double getPositionDop() {
+        return positionDop;
+    }
+
+    public void setPositionDop(double positionDop) {
+        this.positionDop = positionDop;
+    }
+
+    public double getHorizontalDop() {
+        return horizontalDop;
+    }
+
+    public void setHorizontalDop(double horizontalDop) {
+        this.horizontalDop = horizontalDop;
+    }
+
+    public double getVerticalDop() {
+        return verticalDop;
+    }
+
+    public void setVerticalDop(double verticalDop) {
+        this.verticalDop = verticalDop;
+    }
+
+    public String getGeoidHeight() {
+        return geoidHeight;
+    }
+
+    public void setGeoidHeight(String geoidHeight) {
+        this.geoidHeight = geoidHeight;
+    }
+
+    public String getAgeOfGpsData() {
+        return ageOfGpsData;
+    }
+
+    public void setAgeOfGpsData(String ageOfGpsData) {
+        this.ageOfGpsData = ageOfGpsData;
+    }
+
+    public String getAntennaAltitude() {
+        return antennaAltitude;
+    }
+
+    public void setAntennaAltitude(String antennaAltitude) {
+        this.antennaAltitude = antennaAltitude;
+    }
+
+    public String getTemperatura() {
+        return temperatura;
+    }
+
+    public void setTemperatura(String temperatura) {
+        this.temperatura = temperatura;
+    }
 }
 

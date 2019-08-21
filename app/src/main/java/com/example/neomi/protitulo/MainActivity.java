@@ -106,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public String geoIdH;
     public String ageOfData = "DGPS not in use";
     public String antenaAltitud;
+    public ArrayList<DilutionOfPrecision> dop;
 
 
     GnssMeasurementsEvent.Callback mGnssMeasurementsListener;
@@ -402,6 +403,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             int CantSatelites = satelliteCount;
             String ListaSatellite = satellites.toString();
             ArrayList<Satellite> Sat = satellites;
+
             String hdop = Hdop;
             String vdop = Vdop;
             String pdop = Pdop;
@@ -416,17 +418,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date,hdop,vdop,pdop,ageofData,geoidalSeparation,antenaAlt,temperatura, ListaSatellite));
 
 
-            writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, satellites);
-
+            writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites,Double.valueOf(Pdop),Double.valueOf(Hdop),Double.valueOf(Vdop),geoidalSeparation,ageofData, antenaAlt, satellites, temperatura);
 
         }
 
     }
 
     public void writeNewLocation(String userId, String date, double latitud, double longitud, double altitud, float velocidad,
-                                 String actividad, String confianza, float azimuth, float X, float Y, float Z, int cantSat, ArrayList<Satellite> listaSatelites) {
+                                 String actividad, String confianza, float azimuth, float X, float Y, float Z, int cantSat,
+                                 double positionDop, double horizontalDop, double verticalDop, String geoidHeight, String ageOfGpsData,
+                                 String antennaAltitude, ArrayList<Satellite> listaSatelites, String temperatura) {
         String key = mDatabaseRef.push().getKey();
-        Ubicacion ubicacion = new Ubicacion(UserId, date, latitud, longitud, altitud, velocidad, actividad, confianza, azimuth, X, Y, Z, cantSat, listaSatelites);
+        Ubicacion ubicacion = new Ubicacion(
+                UserId, date, latitud, longitud, altitud, velocidad, actividad, confianza,
+                azimuth, X, Y, Z, cantSat,positionDop, horizontalDop, verticalDop, geoidHeight,
+                ageOfGpsData, antennaAltitude, listaSatelites, temperatura);
         Map<String, Object> ubicacionValues = ubicacion.toMap();
 
         Map<String, Object> childUpdates = new HashMap<>();
@@ -566,6 +572,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onNmeaMessage(String message, long timestamp) {
                 nmea = message;
+
                 String[] tokens = nmea.split(",");
                 boolean isGGA = tokens[0].toUpperCase().contains("GGA");
                 boolean isGSA = tokens[0].toUpperCase().contains("GSA");
@@ -633,12 +640,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 }
 
 
+
+
+
                }
             public boolean IsNullOrEmpty(String text){
                 return text == null ||  text.trim().length() == 0;
-            }
-        };
 
+            }
+
+        };
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

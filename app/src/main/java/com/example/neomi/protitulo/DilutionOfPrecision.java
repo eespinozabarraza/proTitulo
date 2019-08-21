@@ -2,39 +2,67 @@ package com.example.neomi.protitulo;
 
 public class DilutionOfPrecision {
 
-    double mPositionDop;
+    private double positionDop;
+    private double horizontalDop;
+    private double verticalDop;
+    private String geoidHeight;
+    private String ageOfGpsData;
+    private String antennaAltitude;
 
-    double mHorizontalDop;
-
-    double mVerticalDop;
-
-    public DilutionOfPrecision(double positionDop, double horizontalDop, double verticalDop) {
-        this.mPositionDop = positionDop;
-        this.mHorizontalDop = horizontalDop;
-        this.mVerticalDop = verticalDop;
+    DilutionOfPrecision(double positionDop, double horizontalDop, double verticalDop, String geoidHeight, String ageOfGpsData, String antennaAltitude) {
+        this.positionDop = positionDop;
+        this.horizontalDop = horizontalDop;
+        this.verticalDop = verticalDop;
+        this.geoidHeight = geoidHeight;
+        this.ageOfGpsData = ageOfGpsData;
+        this.antennaAltitude = antennaAltitude;
     }
 
     public double getPositionDop() {
-        return mPositionDop;
+        return positionDop;
     }
 
     public void setPositionDop(double positionDop) {
-        this.mPositionDop = positionDop;
+        this.positionDop = positionDop;
     }
 
     public double getHorizontalDop() {
-        return mHorizontalDop;
+        return horizontalDop;
     }
 
     public void setHorizontalDop(double horizontalDop) {
-        this.mHorizontalDop = horizontalDop;
+        this.horizontalDop = horizontalDop;
     }
 
     public double getVerticalDop() {
-        return mVerticalDop;
+        return verticalDop;
     }
 
     public void setVerticalDop(double verticalDop) {
-        this.mVerticalDop = verticalDop;
+        this.verticalDop = verticalDop;
+    }
+
+    public String getGeoidHeight() {
+        return geoidHeight;
+    }
+
+    public void setGeoidHeight(String geoidHeight) {
+        this.geoidHeight = geoidHeight;
+    }
+
+    public String getAgeOfGpsData() {
+        return ageOfGpsData;
+    }
+
+    public void setAgeOfGpsData(String ageOfGpsData) {
+        this.ageOfGpsData = ageOfGpsData;
+    }
+
+    public String getAntennaAltitude() {
+        return antennaAltitude;
+    }
+
+    public void setAntennaAltitude(String antennaAltitude) {
+        this.antennaAltitude = antennaAltitude;
     }
 }

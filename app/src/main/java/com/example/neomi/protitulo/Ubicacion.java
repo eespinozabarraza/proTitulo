@@ -22,9 +22,9 @@ public class Ubicacion {
     private int CantSat;
     private ArrayList<Satellite> listaSatelites;
 
-    private double positionDop;
-    private double horizontalDop;
-    private double verticalDop;
+    private String positionDop;
+    private String horizontalDop;
+    private String verticalDop;
     private String geoidHeight;
     private String ageOfGpsData;
     private String antennaAltitude;
@@ -35,7 +35,7 @@ public class Ubicacion {
 
 
     public Ubicacion(String uid, String date, double latitud, double longitud, double altura, float velocidad, String actividad,
-                     String confianza, float mazimuth, float X, float Y, float Z, int CantSat, double positionDop, double horizontalDop, double verticalDop, String geoidHeight, String ageOfGpsData, String antennaAltitude, ArrayList<Satellite> listaSatelites, String temperatura) {
+                     String confianza, float mazimuth, float X, float Y, float Z, int CantSat, String positionDop, String horizontalDop, String verticalDop, String geoidHeight, String ageOfGpsData, String antennaAltitude, ArrayList<Satellite> listaSatelites, String temperatura) {
         this.uid = uid;
         this.date = date;
         this.latitud = latitud;
@@ -146,27 +146,27 @@ public class Ubicacion {
     public void setlistaSatelites(ArrayList<Satellite> listaSatelites) {        this.listaSatelites = listaSatelites;    }
 
 
-    public double getPositionDop() {
+    public String getPositionDop() {
         return positionDop;
     }
 
-    public void setPositionDop(double positionDop) {
+    public void setPositionDop(String positionDop) {
         this.positionDop = positionDop;
     }
 
-    public double getHorizontalDop() {
+    public String getHorizontalDop() {
         return horizontalDop;
     }
 
-    public void setHorizontalDop(double horizontalDop) {
+    public void setHorizontalDop(String horizontalDop) {
         this.horizontalDop = horizontalDop;
     }
 
-    public double getVerticalDop() {
+    public String getVerticalDop() {
         return verticalDop;
     }
 
-    public void setVerticalDop(double verticalDop) {
+    public void setVerticalDop(String verticalDop) {
         this.verticalDop = verticalDop;
     }
 

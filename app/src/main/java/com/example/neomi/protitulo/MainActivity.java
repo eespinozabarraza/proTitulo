@@ -15,7 +15,6 @@ import android.hardware.SensorManager;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
 import android.location.GnssStatus;
-import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
@@ -28,7 +27,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -388,20 +386,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     //******
     @Override
     public void onLocationChanged(Location location) {
-        if (location != null) {
-            final double latitud = location.getLatitude();
-            final double longitud = location.getLongitude();
-            final double altitud = location.getAltitude();
-            final float velocidad = location.getSpeed();
+        final double latitud = location.getLatitude();
+        final double longitud = location.getLongitude();
+        final double altitud = location.getAltitude();
+        final float velocidad = location.getSpeed();
+        String date = df.format(Calendar.getInstance().getTime());
+        writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, ACTIVIDAD, CONFIANZA, mAzimuth, dimX, dimY, dimZ, satelliteCount,Pdop,Hdop,Vdop,geoIdH,ageOfData, antenaAltitud, satellites, Float.toString(temp));
+
+  /*      if (location != null) {
+
             final String Actividad = ACTIVIDAD;
             final String Confianza = CONFIANZA;
             final float Azimuth = mAzimuth;
             final float X = dimX;
             final float Y = dimY;
             final float Z = dimZ;
-            String date = df.format(Calendar.getInstance().getTime());
+
             int CantSatelites = satelliteCount;
-            String ListaSatellite = satellites.toString();
+
             ArrayList<Satellite> Sat = satellites;
 
             String hdop = Hdop;
@@ -413,20 +415,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             String temperatura = Float.toString(temp);
 
             locationTv.setText(String.format
-                    ("Latitud: %s\n  Longitud: %s\n Altitud: %s\n Velocidad: %s\n Actividad: %s\n confianza: %s\n Azimuth: %s\n X : %s\n Y : %s\n Z : %s\n SATELLITE:%s\n  " +
-                                    "Fecha: %s\n Hdop : %s\n Vdop : %s\n Pdop : %s\n ageOfData: %s\n geoidalSeparation: %s\n AntenaAltitud: %s\n Temperatura :%s\n CantidadLista: %s",
-                            latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date,hdop,vdop,pdop,ageofData,geoidalSeparation,antenaAlt,temperatura, ListaSatellite));
+                    ("" Latitud: %s\n  Longitud: %s\n Altitud: %s\n Velocidad: %s\n Actividad: %s\n confianza: %s\n Azimuth: %s\n X : %s\n Y : %s\n Z : %s\n SATELLITE:%s\n  " +
+                                    "Fecha: %s\n Hdop : %s\n Vdop : %s\n Pdop : %s\n ageOfData: %s\n geoidalSeparation: %s\n AntenaAltitud: %s\n Temperatura :%s",
+                           latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date,hdop,vdop,pdop,ageofData,geoidalSeparation,antenaAlt,temperatura));
 
 
-            writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites,Double.valueOf(Pdop),Double.valueOf(Hdop),Double.valueOf(Vdop),geoidalSeparation,ageofData, antenaAlt, satellites, temperatura);
+            writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, ACTIVIDAD, CONFIANZA, mAzimuth, dimX, dimY, dimZ, satelliteCount,Double.valueOf(Pdop),Double.valueOf(Hdop),Double.valueOf(Vdop),geoIdH,ageOfData, antenaAltitud, satellites, Float.toString(temp));
 
-        }
+        }*/
 
     }
 
     public void writeNewLocation(String userId, String date, double latitud, double longitud, double altitud, float velocidad,
                                  String actividad, String confianza, float azimuth, float X, float Y, float Z, int cantSat,
-                                 double positionDop, double horizontalDop, double verticalDop, String geoidHeight, String ageOfGpsData,
+                                 String positionDop, String horizontalDop, String verticalDop, String geoidHeight, String ageOfGpsData,
                                  String antennaAltitude, ArrayList<Satellite> listaSatelites, String temperatura) {
         String key = mDatabaseRef.push().getKey();
         Ubicacion ubicacion = new Ubicacion(
@@ -562,7 +564,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (Constants.postNougat) {
             addGnssStatusListener();
             addNameaStatusListener();
-        }else addGpsStatusListener();
+        }else;
     }
 
 
@@ -678,7 +680,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 satellites = new ArrayList<>();
                 for (int i = 0; i < satelliteCount; i++)
                     satellites.add(getSatellite(mGnssStatus, i));
-                putSatellitePreferences();
+  //              putSatellitePreferences();
             }
 
         };
@@ -710,7 +712,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     @Deprecated
-    private void addGpsStatusListener() {
+    /*private void addGpsStatusListener() {
         Log.d(TAG, "Adding Gps status listener");
         mGpsStatusListener = new GpsStatus.Listener() {
             @Override
@@ -785,16 +787,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         editor.apply();
     }
 
-
+*/
     @RequiresApi(Build.VERSION_CODES.N)
-    private void removeStatusListener() {
+
+ /*   private void removeStatusListener() {
         if (mLocationManager != null) {
-            if (Constants.postNougat && (mGnssStatusListener != null))
+            if (Constants.postNougat && (mGnssStatusListener != null)) {
                 mLocationManager.unregisterGnssStatusCallback(mGnssStatusListener);
-            else if (mGpsStatusListener != null)
+            } else if (mGpsStatusListener != null) {
                 mLocationManager.removeGpsStatusListener(mGpsStatusListener);
+            }
         }
-    }
+    }*/
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
     }

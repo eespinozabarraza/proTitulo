@@ -1,6 +1,5 @@
 package com.example.neomi.protitulo;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -63,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     // Variables Ubicacion
     private Location location;
+    int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
     private TextView locationTv;
     private GoogleApiClient googleApiClient;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
@@ -185,8 +185,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         locationTv = findViewById(R.id.location);
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         // we add permissions we need to request location of the users
-        permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        permissions.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
+        permissions.add(android.Manifest.permission.ACCESS_COARSE_LOCATION);
 
         permissionsToRequest = permissionsToRequest(permissions);
 //inicia locacion del usuario.
@@ -217,8 +217,39 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         //GNSSSTATUS
         context = getApplicationContext();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        mProvider = mLocationManager.getProvider(LocationManager.GPS_PROVIDER);
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Debes activar los permisos para mostrar tu ubicacion", Toast.LENGTH_SHORT).show();
+
+        }
+        if (ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            mProvider = mLocationManager.getProvider(LocationManager.GPS_PROVIDER);
+        }
+
+
         if (mProvider == null) {
             Log.e(TAG, "Unable to get GPS_PROVIDER");
             return;
@@ -336,8 +367,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
@@ -360,8 +391,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         locationRequest.setInterval(UPDATE_INTERVAL);
         locationRequest.setFastestInterval(FASTES_INTERVAL);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "Debes activar los permisos para mostrar tu ubicacion", Toast.LENGTH_SHORT).show();
 
         }
@@ -654,7 +685,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         };
 
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -685,7 +716,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         };
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding

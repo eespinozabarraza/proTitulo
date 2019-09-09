@@ -1,42 +1,34 @@
 {
   "project_info": {
-    "project_number": "708723936327",
-    "firebase_url": "https://protitulo-1e097.firebaseio.com",
-    "project_id": "protitulo-1e097",
-    "storage_bucket": "protitulo-1e097.appspot.com"
+    "project_number": "1092450833525",
+    "firebase_url": "https://protitulotest-61860.firebaseio.com",
+    "project_id": "protitulotest-61860",
+    "storage_bucket": "protitulotest-61860.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:708723936327:android:5aa7a02d34577ccc",
+        "mobilesdk_app_id": "1:1092450833525:android:7e7d49b1606b093c2a143c",
         "android_client_info": {
           "package_name": "com.example.neomi.protitulo"
         }
       },
       "oauth_client": [
         {
-          "client_id": "708723936327-d465uujbf3c72pikofein4pef9i5qg9j.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.neomi.protitulo",
-            "certificate_hash": "b17246afd041ea96f50900f670d8168191f68219"
-          }
-        },
-        {
-          "client_id": "708723936327-pbga59b3mo4ft5t8gcn1vobmcjtab2f1.apps.googleusercontent.com",
+          "client_id": "1092450833525-jmtajncggka6qv5jv2pqsgdv9lhhn7r6.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA8UqVvJmSvtM941rq2WAD81l-MdmwPPjw"
+          "current_key": "AIzaSyADB_9WTcqCVwzjFaisAdR-isnHo9jVmMU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "708723936327-pbga59b3mo4ft5t8gcn1vobmcjtab2f1.apps.googleusercontent.com",
+              "client_id": "1092450833525-jmtajncggka6qv5jv2pqsgdv9lhhn7r6.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

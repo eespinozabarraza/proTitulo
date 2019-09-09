@@ -16,4 +16,9 @@
     <string name="activity_tilting">Tilting</string>
     <string name="activity_walking">walking</string>
     <string name="activity_unknown">Unknown</string>
+    <string name="recolection">Recolección de datos</string>
+    <string name="salir">Salir</string>
+    <string name="email_input">Ingrese su correo</string>
+    <string name="pass_input">Ingrese su contraseña</string>
+    <string name="cancell">Cancelar</string>
 </resources>

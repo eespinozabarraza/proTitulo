@@ -41,7 +41,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         etEmail = (EditText) findViewById(R.id.etEmail);
         etPassword = (EditText) findViewById(R.id.etPassword);
         btnIngresar = (Button) findViewById(R.id.btnIngresar);
-        tvRegistrarse = (TextView) findViewById(R.id.tvRegistrarse);
+        tvRegistrarse = (TextView) findViewById(R.id.btnRegistrarse);
         progressDialog = new ProgressDialog(this);
 
         btnIngresar.setOnClickListener(this);
@@ -69,7 +69,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             findViewById(R.id.etEmail).setVisibility(View.VISIBLE);
             findViewById(R.id.etPassword).setVisibility(View.VISIBLE);
             findViewById(R.id.btnIngresar).setVisibility(View.VISIBLE);
-            findViewById(R.id.tvRegistrarse).setVisibility(View.VISIBLE);
+            findViewById(R.id.btnRegistrarse).setVisibility(View.VISIBLE);
         }
     }
 
@@ -111,7 +111,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.tvRegistrarse:
+            case R.id.btnRegistrarse:
                 Intent intent = new Intent(this,Registro.class);
                 startActivity(intent);
                 break;

@@ -417,44 +417,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     //******
     @Override
     public void onLocationChanged(Location location) {
-        final double latitud = location.getLatitude();
-        final double longitud = location.getLongitude();
-        final double altitud = location.getAltitude();
-        final float velocidad = location.getSpeed();
-        final String Actividad = ACTIVIDAD;
-        final String Confianza = CONFIANZA;
-        final float Azimuth = mAzimuth;
-        final float X = dimX;
-        final float Y = dimY;
-        final float Z = dimZ;
+        if (location != null){
+            final double latitud = location.getLatitude();
+            final double longitud = location.getLongitude();
+            final double altitud = location.getAltitude();
+            final float velocidad = location.getSpeed();
+            String date = df.format(Calendar.getInstance().getTime());
+            locationTv.setText(String.format("Estamos recolectando los datos, MUCHAS GRACIAS"));
+            writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, ACTIVIDAD, CONFIANZA, mAzimuth, dimX, dimY, dimZ, satelliteCount,Pdop,Hdop,Vdop,geoIdH,ageOfData, antenaAltitud, satellites, Float.toString(temp));
 
-        int CantSatelites = satelliteCount;
-
-        ArrayList<Satellite> Sat = satellites;
-
-        String hdop = Hdop;
-        String vdop = Vdop;
-        String pdop = Pdop;
-        String ageofData =ageOfData;
-        String geoidalSeparation = geoIdH;
-        String antenaAlt = antenaAltitud;
-        String temperatura = Float.toString(temp);
-        String date = df.format(Calendar.getInstance().getTime());
-        locationTv.setText(String.format
-                (" Latitud: %s\n  Longitud: %s\n Altitud: %s\n Velocidad: %s\n Actividad: %s\n confianza: %s\n Azimuth: %s\n X : %s\n Y : %s\n Z : %s\n SATELLITE:%s\n  " +
-                                "Fecha: %s\n Hdop : %s\n Vdop : %s\n Pdop : %s\n ageOfData: %s\n geoidalSeparation: %s\n AntenaAltitud: %s\n Temperatura :%s",
-                        latitud, longitud, altitud, velocidad, Actividad, Confianza, Azimuth, X, Y, Z, CantSatelites, date,hdop,vdop,pdop,ageofData,geoidalSeparation,antenaAlt,temperatura));
-        writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, ACTIVIDAD, CONFIANZA, mAzimuth, dimX, dimY, dimZ, satelliteCount,Pdop,Hdop,Vdop,geoIdH,ageOfData, antenaAltitud, satellites, Float.toString(temp));
-
-  /*      if (location != null) {
-
-             */
-
-
-
-
-
-        
+        } else {
+            locationTv.setText(String.format("No hemos podido acceder a tu localización"));
+        }
 
     }
 
@@ -743,86 +717,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return (new Satellite(azimuth, elevation, snr, prn, used, type));
     }
 
-    @Deprecated
-    /*private void addGpsStatusListener() {
-        Log.d(TAG, "Adding Gps status listener");
-        mGpsStatusListener = new GpsStatus.Listener() {
-            @Override
-            public void onGpsStatusChanged(int event) {
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-                mGpsStatus = mLocationManager.getGpsStatus(mGpsStatus);
-                switch (event) {
-                    case GpsStatus.GPS_EVENT_STARTED:
-                        break;
-                    case GpsStatus.GPS_EVENT_STOPPED:
-                        break;
-                    case GpsStatus.GPS_EVENT_FIRST_FIX:
-                        break;
-                    case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
-                        //Log.d(TAG, "Checking status", localLog);
-                        GpsStatus gpsStatus = mLocationManager.getGpsStatus(null);
-                        satellites = new ArrayList<>();
-                        for (GpsSatellite satellite : gpsStatus.getSatellites())
-                            satellites.add(getSatellite(satellite));
-                        putSatellitePreferences();
-                        break;
-                }
-            }
-        };
-        if (Constants.postMarshmallow && ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED)
-            gpsPermissionGranted = true;
-        if (gpsPermissionGranted)
-            mLocationManager.addGpsStatusListener(mGpsStatusListener);
-    }
 
-    // populate a satellite from gps satellite
-    private Satellite getSatellite(GpsSatellite gpsSatellite) {
-        float azimuth = gpsSatellite.getAzimuth();
-        float elevation = gpsSatellite.getElevation();
-        float snr = gpsSatellite.getSnr();
-        int prn = gpsSatellite.getPrn();
-        boolean used = gpsSatellite.usedInFix();
-        return (new Satellite(azimuth, elevation, snr, prn, used));
-    }
-
-    // save the satellite data in preferences
-    private void putSatellitePreferences() {
-        int numSatellites = satellites.size();
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(Constants.GPS_SATELLITES, numSatellites);
-        int used_satellites = 0;
-        float total_snr = 0;
-        for (int i = 0; i < satellites.size(); i++) {
-            editor.putFloat(Constants.GPS_AZIMUTH + "_" + i, satellites.get(i).getAzimuth());
-            editor.putFloat(Constants.GPS_ELEVATION + "_" + i, satellites.get(i).getElevation());
-            editor.putFloat(Constants.GPS_SNR + "_" + i, satellites.get(i).getSnr());
-            editor.putInt(Constants.GPS_PRN + "_" + i, satellites.get(i).getPrn());
-            editor.putBoolean(Constants.GPS_USED_SATELLITES + "_" + i, satellites.get(i).isUsed());
-            if (satellites.get(i).isUsed()) {
-                used_satellites++;
-                total_snr += satellites.get(i).getSnr();
-            }
-        }
-        float avg_snr = (used_satellites > 0) ? total_snr / used_satellites : 0.0f;
-        editor.putFloat(Constants.GPS_SATINFO, avg_snr);
-        editor.putInt(Constants.GPS_USED_SATELLITES, used_satellites);
-        editor.apply();
-    }
-
-*/
     @RequiresApi(Build.VERSION_CODES.N)
 
- /*   private void removeStatusListener() {
+    private void removeStatusListener() {
         if (mLocationManager != null) {
             if (Constants.postNougat && (mGnssStatusListener != null)) {
                 mLocationManager.unregisterGnssStatusCallback(mGnssStatusListener);
@@ -830,7 +728,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 mLocationManager.removeGpsStatusListener(mGpsStatusListener);
             }
         }
-    }*/
+    }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
     }

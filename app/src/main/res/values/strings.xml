@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">proTitulo</string>
+    <string name="app_name">MoviTracky</string>
     <string name="email">Correo Electronico</string>
     <string name="password">Contraseña</string>
     <string name="login">Ingresar</string>

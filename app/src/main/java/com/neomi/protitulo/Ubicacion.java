@@ -75,8 +75,6 @@ public class Ubicacion {
         result.put("Y", Y);
         result.put("Z", Z);
         result.put("CantSat", CantSat);
-        result.put("starCount", starCount);
-        result.put("stars", stars);
         result.put("positionDop",positionDop);
         result.put("horizontalDop",horizontalDop);
         result.put("verticalDop",verticalDop);

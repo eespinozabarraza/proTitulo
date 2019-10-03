@@ -120,6 +120,8 @@ public class Satellite {
         return y;
     }
 
+    public double getZ(){ return  z;}
+
     public boolean isValidSatellite() {
         return validSatellite;
     }

@@ -27,6 +27,8 @@ public class Registro extends AppCompatActivity implements View.OnClickListener 
 
     private EditText etPassword;
     private EditText etEmail;
+    private String eType;
+
     private Button btnCancelar;
     private Button btnRegistar;
     private ProgressDialog progressDialog;
@@ -41,6 +43,7 @@ public class Registro extends AppCompatActivity implements View.OnClickListener 
 
         etEmail = (EditText) findViewById(R.id.etRegEmail);
         etPassword = (EditText) findViewById(R.id.etRegPassword);
+        eType = "alumno";
         btnRegistar = (Button) findViewById(R.id.btnRegistrar);
         btnCancelar = (Button) findViewById(R.id.btnCancelar);
         progressDialog = new ProgressDialog(this);
@@ -54,6 +57,7 @@ public class Registro extends AppCompatActivity implements View.OnClickListener 
 
         final String email = etEmail.getText().toString().trim();
         final String password = etPassword.getText().toString().trim();
+        final String type = eType;
 
         if (TextUtils.isEmpty(email)){
             Toast.makeText(Registro.this,"Falta ingresar su email",Toast.LENGTH_LONG).show();

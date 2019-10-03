@@ -318,6 +318,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onStop() {
         super.onStop();
+        StartGNSSGPS();
+        startTracking();
         //Ubicacion
         googleApiClient.reconnect();
         //
@@ -339,10 +341,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onPause() {
         super.onPause();
-        startTracking();
-        StartGNSSGPS();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
-        Toast.makeText(this, "Estoy en pausa", Toast.LENGTH_LONG).show();
+ //       startTracking();
+ //       StartGNSSGPS();
+ //       LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+ //       Toast.makeText(this, "Estoy en pausa", Toast.LENGTH_LONG).show();
         //Ubicacion
         googleApiClient.reconnect();
         //

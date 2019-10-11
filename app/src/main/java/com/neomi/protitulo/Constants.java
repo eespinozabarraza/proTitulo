@@ -8,6 +8,7 @@ public class Constants {
     static final long DETECTION_INTERVAL_IN_MILLISECONDS = 10 * 1000;
 
     public static final int CONFIDENCE = 70;
+    public static final float SMALLEST_DISPLACEMENT = 10f;
 
     // shared parameters based on the settings -- key is stored in preferences.xml
     final static String PREF_WALKING_SPEED = "Walking_speed";

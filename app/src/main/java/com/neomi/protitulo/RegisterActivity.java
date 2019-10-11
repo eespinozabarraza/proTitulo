@@ -19,7 +19,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class Registro extends AppCompatActivity implements View.OnClickListener {
+public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
 
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabaseRef;
@@ -60,11 +60,11 @@ public class Registro extends AppCompatActivity implements View.OnClickListener 
         final String type = eType;
 
         if (TextUtils.isEmpty(email)){
-            Toast.makeText(Registro.this,"Falta ingresar su email",Toast.LENGTH_LONG).show();
+            Toast.makeText(RegisterActivity.this,"Falta ingresar su email",Toast.LENGTH_LONG).show();
             return;
         }
         if (TextUtils.isEmpty(password)){
-            Toast.makeText(Registro.this,"Falta ingresar su contraseña",Toast.LENGTH_LONG).show();
+            Toast.makeText(RegisterActivity.this,"Falta ingresar su contraseña",Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -77,15 +77,15 @@ public class Registro extends AppCompatActivity implements View.OnClickListener 
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             final String UserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                            Toast.makeText(Registro.this,"Registro exitoso",Toast.LENGTH_LONG).show();
+                            Toast.makeText(RegisterActivity.this,"RegisterActivity exitoso",Toast.LENGTH_LONG).show();
                             Usuario usuario = new Usuario(UserId,email);
                             mDatabaseRef.child(UserId).setValue(usuario);
                             volver();
                         } else {
                             if (task.getException() instanceof FirebaseAuthUserCollisionException){
-                                Toast.makeText(Registro.this,"Este usuario ya existe",Toast.LENGTH_LONG).show();
+                                Toast.makeText(RegisterActivity.this,"Este usuario ya existe",Toast.LENGTH_LONG).show();
                             }
-                            Toast.makeText(Registro.this,"Algo a fallado",Toast.LENGTH_LONG).show();
+                            Toast.makeText(RegisterActivity.this,"Algo a fallado",Toast.LENGTH_LONG).show();
                         }
                         progressDialog.dismiss();
                     }

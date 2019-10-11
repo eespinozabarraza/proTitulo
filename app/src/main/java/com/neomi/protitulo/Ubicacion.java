@@ -14,7 +14,7 @@ public class Ubicacion {
     private double altura;
     private float velocidad;
     private String actividad;
-    private String confianza;
+    private int confianza;
     private float mazimuth;
     private float X;
     private float Y;
@@ -35,7 +35,7 @@ public class Ubicacion {
 
 
     public Ubicacion(String uid, String date, double latitud, double longitud, double altura, float velocidad, String actividad,
-                     String confianza, float mazimuth, float X, float Y, float Z, int CantSat, String positionDop, String horizontalDop, String verticalDop, String geoidHeight, String ageOfGpsData, String antennaAltitude, ArrayList<Satellite> listaSatelites, String temperatura) {
+                     int confianza, float mazimuth, float X, float Y, float Z, int CantSat, String positionDop, String horizontalDop, String verticalDop, String geoidHeight, String ageOfGpsData, String antennaAltitude, ArrayList<Satellite> listaSatelites, String temperatura) {
         this.uid = uid;
         this.date = date;
         this.latitud = latitud;
@@ -115,9 +115,9 @@ public class Ubicacion {
 
     public void setActividad(String actividad) {this.actividad = actividad;}
 
-    public String getConfianza(){return confianza;}
+    public int getConfianza(){return confianza;}
 
-    public void setConfianza(String confianza) {this.confianza = confianza;}
+    public void setConfianza(int confianza) {this.confianza = confianza;}
 
     public float getAzimuth(){return mazimuth;}
 

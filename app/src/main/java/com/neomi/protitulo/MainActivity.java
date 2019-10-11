@@ -1,11 +1,13 @@
 package com.neomi.protitulo;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -14,102 +16,95 @@ import android.hardware.SensorManager;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
 import android.location.GnssStatus;
+import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.location.OnNmeaMessageListener;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, LocationListener, GpsStatus.Listener {
+
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener, LocationListener {
+
+    // Variables Location
+    private Button mRequestLocationUpdatesButton;
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
+    private MyReceiver myReceiver;
+    private LocationUpdatesService mService =null;
+    private boolean mBound = false;
+    private TextView locationTv;
+
+    //Location Var
+
+    private double latitud;
+    private double longitud;
+    private double altitud;
+    private float velocidad;
+    private String fecha;
+    private boolean detect = false;
+    int CantSat;
+
+    // Monitors the state of the connection to the service.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LocationUpdatesService.LocalBinder binder = (LocationUpdatesService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+            mBound = false;
+        }
+    };
+
     // Variables BD
     private DatabaseReference mDatabaseRef;
     final String UserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-    private static final String TAG = "Grabando Ubicacion";
-    DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy, HH:mm");
-
-    // Variables Ubicacion
-    private Location location;
-    int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION;
-    private TextView locationTv;
-    private GoogleApiClient googleApiClient;
-    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private LocationRequest locationRequest;
-    private long UPDATE_INTERVAL = 10000, FASTES_INTERVAL = 10000; //1000 ms = 1 seg
-//
-
-    BroadcastReceiver broadcastReceiver;
-    private String ACTIVIDAD, CONFIANZA;
 
 
-    // Variables Satellite
-    private LocationManager mLocationManager;
-    private LocationProvider mProvider;
-    /*
-     * Variables GnssStatus
-     */
-    // Android M (6.0.1) and below status and listener
-    private GpsStatus mGpsStatus;
-    private GpsStatus.Listener mGpsStatusListener;
+    //Variables Actividad
 
-    // Android N (7.0) and above status and listeners
+    BroadcastReceiver activityReceiver, GNSSReceiver, GPSReceiver;
 
-    GnssStatus mGnssStatus;
-    GnssStatus.Callback mGnssStatusListener;
-    public ArrayList<Satellite> satellites;
-    private boolean gpsPermissionGranted = false;
-    private SharedPreferences sharedPreferences;
-    private Context context;
-    private long minTime; // Min Time between location updates, in milliseconds
-    private float minDistance; // Min Distance between location updates, in meters
-    int satelliteCount;
+    private String ACTIVIDAD;
+    private int CONFIANZA;
 
-
-    public String nmea;
-    public String Hdop;
-    public String Vdop;
-    public String Pdop;
-    public String geoIdH;
-    public String ageOfData = "DGPS not in use";
-    public String antenaAltitud;
-    public ArrayList<DilutionOfPrecision> dop;
-
-
-    GnssMeasurementsEvent.Callback mGnssMeasurementsListener;
-    OnNmeaMessageListener mOnNmeaMessageListener;
-    GnssNavigationMessage.Callback mGnssNavMessageListener;
 
     // Variables Acelerometro y magnetometro
 
@@ -169,40 +164,90 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     boolean haveAccelerometer = false;
     boolean haveMagnetometer = false;
 
-    //lista de presmisos.
 
-    private ArrayList<String> permissionsToRequest;
-    private ArrayList<String> permissionsRejected = new ArrayList<>();
-    private ArrayList<String> permissions = new ArrayList<>();
-    private static final int ALL_PERMISSIONS_RESULT = 1011;
+    /*
+     * VARIABLES GPS Y GNS
+     */
+    // Variables Satellite
+    private LocationManager mLocationManager;
+    private LocationProvider mProvider;
+    // Android M (6.0.1) and below status and listener
+    private GpsStatus mGpsStatus;
+    private GpsStatus.Listener mGpsStatusListener;
+
+    // Android N (7.0) and above status and listeners
+
+    GnssStatus mGnssStatus;
+    GnssStatus.Callback mGnssStatusListener;
+    public ArrayList<Satellite> satellites;
+    private boolean gpsPermissionGranted = false;
+    private SharedPreferences sharedPreferences;
+    private Context context;
+    private long minTime; // Min Time between location updates, in milliseconds
+    private float minDistance; // Min Distance between location updates, in meters
+    int satelliteCount;
+
+    // VARIABLES NMEA
+    public String nmea;
+    public String Hdop;
+    public String Vdop;
+    public String Pdop;
+    public String geoIdH;
+    public String ageOfData = "DGPS not in use";
+    public String antenaAltitud;
 
 
+
+    GnssMeasurementsEvent.Callback mGnssMeasurementsListener;
+    OnNmeaMessageListener mOnNmeaMessageListener;
+    GnssNavigationMessage.Callback mGnssNavMessageListener;
+
+    static MainActivity instance;
+
+
+
+    public static MainActivity getInstance() {
+        return instance;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        myReceiver = new MyReceiver();
 
+        //GNSSSTATUS
+        context = getApplicationContext();
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        minTime = Constants.DETECTION_INTERVAL_IN_MILLISECONDS;
+        LocationRequest mLocationRequest = new LocationRequest();
+        minDistance = mLocationRequest.getSmallestDisplacement();
+
+        gpsPermissionGranted = Constants.preMarshmallow;
+
+        setContentView(R.layout.activity_main);
         locationTv = findViewById(R.id.location);
         mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        // we add permissions we need to request location of the users
-        permissions.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
-        permissions.add(android.Manifest.permission.ACCESS_COARSE_LOCATION);
 
-        permissionsToRequest = permissionsToRequest(permissions);
-//inicia locacion del usuario.
+        if (Utils.requestingLocationUpdates(this)) {
+            if (!checkPermissions()) {
+                requestPermissions();
 
-        if (Constants.postMarshmallow) {
-            if (permissionsToRequest.size() > 0) {
-                requestPermissions(permissionsToRequest.
-                        toArray(new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
-            }
+            } else{
+            mProvider = mLocationManager.getProvider(LocationManager.GPS_PROVIDER);
+            if (mProvider == null) {
+                Log.e(TAG, "Unable to get GPS_PROVIDER");
+                return;
+            }}
         }
-        googleApiClient = new GoogleApiClient.Builder(this).
-                addApi(LocationServices.API).
-                addConnectionCallbacks(this).
-                addOnConnectionFailedListener(this).build();
-//inicia detector de actividad del usuario
-        broadcastReceiver = new BroadcastReceiver() {
+
+
+
+
+        activityReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals(Constants.BROADCAST_DETECTED_ACTIVITY)) {
@@ -210,232 +255,287 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     int confidence = intent.getIntExtra("confidence", 0);
                     handleUserActivity(type, confidence);
                 }
-            }
 
+
+            }
         };
 
-        //GNSSSTATUS
-        context = getApplicationContext();
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Debes activar los permisos para mostrar tu ubicacion", Toast.LENGTH_SHORT).show();
-
-        }
-        if (ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Permission is not granted
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
-                // No explanation needed; request the permission
-                ActivityCompat.requestPermissions(this,
-                        new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        } else {
-            mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            mProvider = mLocationManager.getProvider(LocationManager.GPS_PROVIDER);
-        }
-
-
-        if (mProvider == null) {
-            Log.e(TAG, "Unable to get GPS_PROVIDER");
-            return;
-        }
-        gpsPermissionGranted = Constants.preMarshmallow;
-
-        // set the min time and distance for the location manager
-
-        minTime = Constants.DETECTION_INTERVAL_IN_MILLISECONDS;
-        LocationRequest mLocationRequest = new LocationRequest();
-        minDistance = mLocationRequest.getSmallestDisplacement();
-
-
-        //Manager del Sensor
-
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mTemperature = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
-        haveAccelerometer = mSensorManager.registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
-
-        mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        haveMagnetometer = mSensorManager.registerListener(mSensorEventListener, mMagnetometer, SensorManager.SENSOR_DELAY_GAME);
-
-        if (haveAccelerometer && haveMagnetometer) {
-            // ready to go
-        } else {
-            // unregister and stop
-        }
-        Log.d(TAG, "onCreate: Registered accelerometer listener");
-
-
     }
 
-    private ArrayList<String> permissionsToRequest(ArrayList<String> wantedPermission) {
-        ArrayList<String> result = new ArrayList<>();
 
-        for (String perm : wantedPermission) {
-            if (!hasPermission(perm)) {
-                result.add(perm);
-            }
-        }
-        return result;
-    }
 
-    private boolean hasPermission(String permission) {
-        if (Constants.postMarshmallow) {
-            return checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
-        }
-        return true;
-    }
 
+
+    @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     protected void onStart() {
         super.onStart();
-        startTracking();
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
+        mRequestLocationUpdatesButton = (Button) findViewById(R.id.btnIniciar);
+        mRequestLocationUpdatesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!checkPermissions()) {
+                    requestPermissions();
+                } else {
+                    mService.requestLocationUpdates();
+                    startTracking();
+                    startSensorManager();
+                    StartGNSSGPS();
+                    detect = true;
+                }
+            }
+        });
+        setButtonsState(detect);
+        bindService(new Intent(this, LocationUpdatesService.class), mServiceConnection,
+                Context.BIND_AUTO_CREATE);
 
-        //Ubicacion
-        if (googleApiClient != null) {
-            googleApiClient.connect();
-        }
-        StartGNSSGPS();
 
-        //
-    }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        StartGNSSGPS();
-        startTracking();
-        //Ubicacion
-        googleApiClient.reconnect();
-        //
+
+
+
+        // Restore the state of the buttons when the activity (re)launches.
+        // Bind to the service. If the service is in foreground mode, this signals to the service
+        // that since this activity is in the foreground, the service can exit foreground mode.
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+        LocalBroadcastManager.getInstance(this).registerReceiver(myReceiver,
+                new IntentFilter(LocationUpdatesService.ACTION_BROADCAST));
+        LocalBroadcastManager.getInstance(this).registerReceiver(activityReceiver,
                 new IntentFilter(Constants.BROADCAST_DETECTED_ACTIVITY));
-        //Ubicacion
-        if (!checkPlayServices()) {
-            locationTv.setText("Necesitas instalar Google Play Services para usar la aplicacion");
-        }
-        //
     }
 
-    //para detener el proceso de recoleccion de datos (BORRAR DESPUES)
     @Override
     protected void onPause() {
         super.onPause();
- //       startTracking();
- //       StartGNSSGPS();
- //       LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
- //       Toast.makeText(this, "Estoy en pausa", Toast.LENGTH_LONG).show();
-        //Ubicacion
-        googleApiClient.reconnect();
-        //
     }
 
-    // Ubicacion
-    private boolean checkPlayServices() {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+    @Override
+    protected void onStop() {
+        if (mBound) {
+            // Unbind from the service. This signals to the service that this activity is no longer
+            // in the foreground, and the service can respond by promoting itself to a foreground
+            // service.
+            unbindService(mServiceConnection);
+            mBound = false;
+        }
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
+        super.onStop();
+    }
 
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (apiAvailability.isUserResolvableError(resultCode)) {
-                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST);
-            } else {
-                finish();
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        detect = false;
+        stopTracking();
+        mService.removeLocationUpdates();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(activityReceiver);
+    }
+
+
+    /**
+     * PERMISOS DE TODA LA APLICACION.
+     */
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    private boolean checkPermissions() {
+
+        if(Constants.postOreo){
+            return  ((PackageManager.PERMISSION_GRANTED == (ActivityCompat.checkSelfPermission(this,
+                    Constants.FINE_LOCATION)))&&(PackageManager.PERMISSION_GRANTED == (ActivityCompat.checkSelfPermission(this,
+                    Constants.FOREGROUND))));}
+        else{
+            return  PackageManager.PERMISSION_GRANTED == (ActivityCompat.checkSelfPermission(this,
+                    Constants.FINE_LOCATION));
+        }
+
+    }
+    private void requestPermissions() {
+        final boolean shouldProvideRationale;
+        if(Constants.postPie){
+            shouldProvideRationale = ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Constants.FINE_LOCATION)
+                    && ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Constants.COARSE_LOCATION)
+                    && ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Constants.BACKGROUND)
+                    && ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Constants.FOREGROUND);
+        }else{
+            shouldProvideRationale = ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Constants.FINE_LOCATION)
+                    && ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Constants.COARSE_LOCATION)
+                    && ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Constants.BACKGROUND);
+        }
+
+
+        if (shouldProvideRationale) {
+            Log.i(TAG, "Displaying permission rationale to provide additional context.");
+            if(Constants.postPie){
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{
+                                Constants.FINE_LOCATION,
+                                Constants.COARSE_LOCATION,
+                                Constants.BACKGROUND,
+                                Constants.FOREGROUND
+                        },
+                        REQUEST_PERMISSIONS_REQUEST_CODE);
+            }else{
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{
+                                Constants.FINE_LOCATION,
+                                Constants.COARSE_LOCATION,
+                                Constants.BACKGROUND
+                        },
+                        REQUEST_PERMISSIONS_REQUEST_CODE);
             }
-            return false;
-        }
-        return true;
-
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
 
 
-        location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        mLocationManager.addGpsStatusListener(this);
-        if (location != null) {
-            Toast.makeText(this, "Bienvenido al sistema", Toast.LENGTH_LONG).show();
         } else {
-            Toast.makeText(this, "Ubicacion no encontrada", Toast.LENGTH_LONG).show();
-        }
-        startLocationUpdates();
+            Log.i(TAG, "Requesting permission");
 
+            if(Constants.postPie){
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{
+                                Constants.FINE_LOCATION,
+                                Constants.COARSE_LOCATION,
+                                Constants.BACKGROUND,
+                                Constants.FOREGROUND
+                        },
+                        REQUEST_PERMISSIONS_REQUEST_CODE);
+
+            }else{
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{
+                                Constants.FINE_LOCATION,
+                                Constants.COARSE_LOCATION,
+                                Constants.BACKGROUND
+                        },
+                        REQUEST_PERMISSIONS_REQUEST_CODE);
+
+            }
+
+        }
 
     }
 
-    private void startLocationUpdates() {
-        locationRequest = new LocationRequest();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(UPDATE_INTERVAL);
-        locationRequest.setFastestInterval(FASTES_INTERVAL);
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Debes activar los permisos para mostrar tu ubicacion", Toast.LENGTH_SHORT).show();
-
-        }
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-
-    }
-//
-
-//******
 
 
     @Override
-    public void onConnectionSuspended(int i) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        Log.i(TAG, "onRequestPermissionResult");
+        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.length <= 0) {
+                // If user interaction was interrupted, the permission request is cancelled and you
+                // receive empty arrays.
+                Log.i(TAG, "User interaction was cancelled.");
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission was granted.
+                mService.requestLocationUpdates();
+                startTracking();
+                startSensorManager();
+                StartGNSSGPS();
 
+            } else {
+                setButtonsState(false);
+                Snackbar.make(
+                        findViewById(R.id.activity_main),
+                        R.string.permission_denied_explanation,
+                        Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.settings, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                // Build intent that displays the App settings screen.
+                                Intent intent = new Intent();
+                                intent.setAction(
+                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package",
+                                        BuildConfig.APPLICATION_ID, null);
+                                intent.setData(uri);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            }
+                        })
+                        .show();
+                // Permission denied.
+
+
+            }
+        }
     }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    //******
     @Override
     public void onLocationChanged(Location location) {
-        if (location != null){
-            final double latitud = location.getLatitude();
-            final double longitud = location.getLongitude();
-            final double altitud = location.getAltitude();
-            final float velocidad = location.getSpeed();
-            String date = df.format(Calendar.getInstance().getTime());
-            locationTv.setText(String.format("Estamos recolectando los datos, MUCHAS GRACIAS"));
-            writeNewLocation(UserId, date, latitud, longitud, altitud, velocidad, ACTIVIDAD, CONFIANZA, mAzimuth, dimX, dimY, dimZ, satelliteCount,Pdop,Hdop,Vdop,geoIdH,ageOfData, antenaAltitud, satellites, Float.toString(temp));
-
-        } else {
-            locationTv.setText(String.format("No hemos podido acceder a tu localización"));
-        }
 
     }
 
+    /**
+     *FIN PÈRMISOS DE LA APLICACION.
+     */
+    /**
+     * RECEIVER DEL LOCATIONUPDATESSERVICES
+     * DESDE ACA PUEDES OBTENER LA DATA+
+     */
+    private class MyReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Location location = intent.getParcelableExtra(LocationUpdatesService.EXTRA_LOCATION);
+            if (location != null ){
+                latitud = location.getLatitude();
+                longitud = location.getLongitude();
+                altitud = location.getAltitude();
+                velocidad = location.getSpeed();
+                fecha = DateFormat.getDateTimeInstance().format(new Date());
+                locationTv.setText(String.format( "Muchas gracias por compartir tu ubicación"));
+                /*
+                locationTv.setText(String.format(
+                        "Latitud: " + latitud
+                                + "\n  Longitud: " + longitud
+                                + "\n Altitud: " + altitud
+                                + "\n Velocidad: " + velocidad
+                                + "\n Fecha: " + fecha
+                                + "\n Actividad: " + ACTIVIDAD
+                                + "\n Confianza: " + CONFIANZA
+                                + "\n dipAzimuth: " + mAzimuth
+                                + "\n xAXIS: " + dimX
+                                + "\n yAXIS: " + dimY
+                                + "\n zAXIS: " + dimZ
+                                + "\n CantSat: " + satelliteCount
+                                + "\n PDOP: " + Pdop
+                                + "\n HDOP: " + Hdop
+                                + "\n VDOP: " + Vdop
+                                + "\n GEO: " + geoIdH
+                                + "\n AGE: " + ageOfData
+                                + "\n ANTENA: " +  antenaAltitud
+                                + "\n SATELITES: " + satellites.toString()
+                ));}*/
+                writeNewLocation(UserId, fecha, latitud, longitud, altitud, velocidad, ACTIVIDAD, CONFIANZA,
+                        mAzimuth, dimX, dimY, dimZ, satelliteCount,Pdop,Hdop,Vdop,geoIdH,ageOfData, antenaAltitud,
+                        satellites, Float.toString(temp));
+            }else{
+                locationTv.setText(String.format( "Debes iniciar la recopilación de datos.  Presiona el botón!!"));
+            }
+
+
+
+
+
+        }
+    }
+    //ESCRIBIR LA DATA EN FIREBASE
     public void writeNewLocation(String userId, String date, double latitud, double longitud, double altitud, float velocidad,
-                                 String actividad, String confianza, float azimuth, float X, float Y, float Z, int cantSat,
+                                 String actividad, int confianza, float azimuth, float X, float Y, float Z, int cantSat,
                                  String positionDop, String horizontalDop, String verticalDop, String geoidHeight, String ageOfGpsData,
                                  String antennaAltitude, ArrayList<Satellite> listaSatelites, String temperatura) {
         String key = mDatabaseRef.push().getKey();
@@ -453,42 +553,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }
 
-    //******
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case ALL_PERMISSIONS_RESULT:
-                for (String perm : permissionsToRequest) {
-                    if (!hasPermission(perm)) {
-                        permissionsRejected.add(perm);
-                    }
-                }
-                if (permissionsRejected.size() > 0) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (shouldShowRequestPermissionRationale(permissionsRejected.get(0))) {
-                            new AlertDialog.Builder(MainActivity.this).
-                                    setMessage("Estos permisos son necesarios para obtener tu posicion, debes aceptarlos").
-                                    setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                                requestPermissions(permissionsRejected.toArray(new String[permissionsRejected.size()]),
-                                                        ALL_PERMISSIONS_RESULT);
-                                            }
-                                        }
-                                    }).
-                                    setNegativeButton("Cancel", null).create().show();
-                        }
-                    }
-                } else {
-                    if (googleApiClient != null) {
-                        googleApiClient.connect();
-                    }
-
-                }
-                break;
+    //CAMBIAR LOS ESTADOS DEL BOTON RECOLECTOR.
+    private void setButtonsState(boolean detect) {
+        if (detect) {
+            mRequestLocationUpdatesButton.setEnabled(false);
+        } else {
+            mRequestLocationUpdatesButton.setEnabled(true);
         }
     }
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        // Update the buttons state depending on whether location updates are being requested.
+        if (s.equals(Utils.KEY_REQUESTING_LOCATION_UPDATES)) {
+            setButtonsState(sharedPreferences.getBoolean(Utils.KEY_REQUESTING_LOCATION_UPDATES,
+                    false));
+        }
+    }
+
+
+//DESLOGEAR USUARIO
 
     public void volverLogIn(View view) {
         Intent intent = new Intent(this, LoginActivity.class);
@@ -497,46 +580,37 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         finish();
     }
 
-
-    //Reconocer Actividad de Usuario.
+    //RECONOCE ACTIVIDAD DEL USUARIO
     private void handleUserActivity(int type, int confidence) {
         String label = getString(R.string.activity_unknown);
-
 
         switch (type) {
             case DetectedActivity.IN_VEHICLE: {
                 label = getString(R.string.activity_in_vehicle);
-
                 break;
             }
             case DetectedActivity.ON_BICYCLE: {
                 label = getString(R.string.activity_on_bicycle);
-
                 break;
             }
             case DetectedActivity.ON_FOOT: {
                 label = getString(R.string.activity_on_foot);
-
                 break;
             }
             case DetectedActivity.RUNNING: {
                 label = getString(R.string.activity_running);
-
                 break;
             }
             case DetectedActivity.STILL: {
                 label = getString(R.string.activity_still);
-
                 break;
             }
             case DetectedActivity.TILTING: {
                 label = getString(R.string.activity_tilting);
-
                 break;
             }
             case DetectedActivity.WALKING: {
                 label = getString(R.string.activity_walking);
-
                 break;
             }
             case DetectedActivity.UNKNOWN: {
@@ -545,34 +619,67 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         }
 
-
+        Log.e(TAG, "User activity: " + label + ", Confidence: " + confidence);
 
         if (confidence > Constants.CONFIDENCE) {
             ACTIVIDAD = label;
-            CONFIANZA = confidence + "%";
+            CONFIANZA = confidence;
         }
-
     }
 
+
+
+
     private void startTracking() {
-        Intent intent1 = new Intent(MainActivity.this, BackgroundDetectedActivitiesService.class);
-        startService(intent1);
+        Intent activity = new Intent(MainActivity.this, BackgroundDetectedActivitiesService.class);
+        startService(activity);
+        /* CUANDO SE IMPLEMENTE EL SERVICIO GPSSSERVICE
+        Intent gps = new Intent(MainActivity.this , GPSService.class);
+        startService(gps); */
+
     }
 
     private void stopTracking() {
-        Intent intent1 = new Intent(MainActivity.this, BackgroundDetectedActivitiesService.class);
-        stopService(intent1);
+        Intent activity = new Intent(MainActivity.this, BackgroundDetectedActivitiesService.class);
+        stopService(activity);
     }
 
-    //fin reconocer actividad de usuario.
 
-// Funcion que incia GnssStatus
 
+
+
+    //FIN RECONOCER ACTIVIDAD DE USUARIO.
+
+    //INICIAR LECTURA DE SENSORES
+    private void startSensorManager(){
+        //Manager del Sensor
+
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mTemperature = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+        haveAccelerometer = mSensorManager.registerListener(mSensorEventListener, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
+
+        mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        haveMagnetometer = mSensorManager.registerListener(mSensorEventListener, mMagnetometer, SensorManager.SENSOR_DELAY_GAME);
+
+        if (haveAccelerometer && haveMagnetometer) {
+            // ready to go
+        } else {
+            // unregister and stop
+        }
+        Log.d(TAG, "onCreate: Registered accelerometer listener");
+    }
+
+    //FIN LECTURA DE SENSORES
+
+    //INICIO GNSS GPSS Y NMEA
     public void StartGNSSGPS() {
         if (Constants.postNougat) {
             addGnssStatusListener();
             addNameaStatusListener();
-        }else;
+        }else{
+            addGpsStatusListener();
+        }
     }
 
 
@@ -643,7 +750,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 if (isGGA) {
                     if (tokens.length > 9 &&!IsNullOrEmpty(tokens[9])) {
 
-                            antenaAltitud = tokens[9];
+                        antenaAltitud = tokens[9];
 
 
                     }
@@ -653,7 +760,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
 
-               }
+            }
             public boolean IsNullOrEmpty(String text){
                 return text == null ||  text.trim().length() == 0;
 
@@ -663,13 +770,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         mLocationManager.addNmeaListener(mOnNmeaMessageListener);
@@ -678,6 +778,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void addGnssStatusListener() {
 
         mGnssStatusListener = new GnssStatus.Callback() {
@@ -688,20 +789,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 satellites = new ArrayList<>();
                 for (int i = 0; i < satelliteCount; i++)
                     satellites.add(getSatellite(mGnssStatus, i));
-  //              putSatellitePreferences();
+                // putSatellitePreferences();
             }
 
         };
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
+        if (ActivityCompat.checkSelfPermission(this, Constants.FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
         }
         mLocationManager.registerGnssStatusCallback(mGnssStatusListener);
 
@@ -720,18 +814,89 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.N)
 
-    private void removeStatusListener() {
-        if (mLocationManager != null) {
-            if (Constants.postNougat && (mGnssStatusListener != null)) {
-                mLocationManager.unregisterGnssStatusCallback(mGnssStatusListener);
-            } else if (mGpsStatusListener != null) {
-                mLocationManager.removeGpsStatusListener(mGpsStatusListener);
+
+
+    @Deprecated
+    private void addGpsStatusListener() {
+        Log.d(TAG, "Adding Gps status listener");
+        mGpsStatusListener = new GpsStatus.Listener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public void onGpsStatusChanged(int event) {
+                if (checkSelfPermission(Constants.FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                    return;
+                }
+                mGpsStatus = mLocationManager.getGpsStatus(mGpsStatus);
+                switch (event) {
+                    case GpsStatus.GPS_EVENT_STARTED: break;
+                    case GpsStatus.GPS_EVENT_STOPPED: break;
+                    case GpsStatus.GPS_EVENT_FIRST_FIX: break;
+                    case GpsStatus.GPS_EVENT_SATELLITE_STATUS:
+                        //Log.d(TAG, "Checking status", localLog);
+                        GpsStatus gpsStatus = mLocationManager.getGpsStatus(null);
+                        satellites = new ArrayList<>();
+                        for(GpsSatellite satellite: gpsStatus.getSatellites())
+                            satellites.add(getSatellite(satellite));
+                        putSatellitePreferences();
+                        break;
+                }
             }
-        }
+        };
+        if (Constants.postMarshmallow && ContextCompat.checkSelfPermission(context, Constants.FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED)
+            gpsPermissionGranted = true;
+        if (gpsPermissionGranted)
+            mLocationManager.addGpsStatusListener(mGpsStatusListener);
     }
 
+    // populate a satellite from gps satellite
+    private Satellite getSatellite(GpsSatellite gpsSatellite) {
+        float azimuth = gpsSatellite.getAzimuth();
+        float elevation = gpsSatellite.getElevation();
+        float snr = gpsSatellite.getSnr();
+        int prn = gpsSatellite.getPrn();
+        boolean used = gpsSatellite.usedInFix();
+        return (new Satellite(azimuth, elevation, snr, prn, used));
+    }
+
+    // save the satellite data in preferences
+    private void putSatellitePreferences() {
+        int numSatellites = satellites.size();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(Constants.GPS_SATELLITES, numSatellites);
+        int used_satellites = 0;
+        float total_snr = 0;
+        for (int i = 0; i < satellites.size(); i++) {
+            editor.putFloat(Constants.GPS_AZIMUTH + "_" + i, satellites.get(i).getAzimuth());
+            editor.putFloat(Constants.GPS_ELEVATION + "_" + i, satellites.get(i).getElevation());
+            editor.putFloat(Constants.GPS_SNR + "_" + i, satellites.get(i).getSnr());
+            editor.putInt(Constants.GPS_PRN + "_" + i, satellites.get(i).getPrn());
+            editor.putBoolean(Constants.GPS_USED_SATELLITES + "_" + i, satellites.get(i).isUsed() );
+            if (satellites.get(i).isUsed()) {
+                used_satellites++;
+                total_snr += satellites.get(i).getSnr();
+            }
+        }
+        float avg_snr = (used_satellites > 0) ? total_snr / used_satellites: 0.0f;
+        editor.putFloat(Constants.GPS_SATINFO, avg_snr);
+        editor.putInt(Constants.GPS_USED_SATELLITES, used_satellites);
+        //Log.d(TAG, "No. of used satellites: " + used_satellites + " SNR: " + total_snr, localLog);
+        editor.apply();
+    }
+
+
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private void removeStatusListener() {
+        if (mLocationManager != null) {
+            if (Constants.postNougat &&(mGnssStatusListener != null))
+                mLocationManager.unregisterGnssStatusCallback(mGnssStatusListener);
+            else if (mGpsStatusListener != null)
+                mLocationManager.removeGpsStatusListener(mGpsStatusListener);
+        }
+    }
     public void onStatusChanged(String provider, int status, Bundle extras) {
     }
 
@@ -744,9 +909,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 
-    @Override
-    public void onGpsStatusChanged(int i) {
 
-    }
 
 }

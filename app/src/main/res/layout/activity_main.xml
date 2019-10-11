@@ -1,99 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/linearLayout"
+    <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toStartOf="@+id/location"
-        app:layout_constraintHorizontal_bias="0.501"
-        app:layout_constraintStart_toStartOf="@+id/location"
-        tools:layout_editor_absoluteY="0dp"
-        tools:ignore="NotSibling">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="84dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/gpsvectormini" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/activity_main"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toStartOf="@+id/location"
+            app:layout_constraintHorizontal_bias="0.501"
+            app:layout_constraintStart_toStartOf="@+id/location"
+            tools:layout_editor_absoluteY="0dp"
+            tools:ignore="NotSibling">
 
-        <TextView
-            android:id="@+id/currentLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/recolection"
-            android:textSize="25sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.497"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView3"
-            tools:layout_conversion_absoluteHeight="34dp"
-            tools:layout_conversion_absoluteWidth="249dp"
-            tools:layout_conversion_wrapHeight="90"
-            tools:layout_conversion_wrapWidth="654" />
+            <ImageView
+                android:id="@+id/imageView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="84dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/gpsvectormini" />
 
-        <TextView
-            android:id="@+id/location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="48dp"
-            android:gravity="center_horizontal"
-            android:textSize="23sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/currentLocation"
-            tools:layout_conversion_absoluteHeight="31dp"
-            tools:layout_conversion_absoluteWidth="0dp"
-            tools:layout_conversion_wrapHeight="81"
-            tools:layout_conversion_wrapWidth="0" />
+            <TextView
+                android:id="@+id/currentLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/recolection"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.497"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageView3"
+                tools:layout_conversion_absoluteHeight="34dp"
+                tools:layout_conversion_absoluteWidth="249dp"
+                tools:layout_conversion_wrapHeight="90"
+                tools:layout_conversion_wrapWidth="654" />
 
-        <Button
-            android:id="@+id/btnSalir"
-            android:layout_width="140dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="150dp"
-            android:layout_marginEnd="150dp"
-            android:backgroundTint="#5C6BC0"
-            android:fontFamily="sans-serif"
-            android:onClick="volverLogIn"
-            android:text="@string/salir"
-            android:textAlignment="center"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:typeface="sans"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.517"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/location"
-            app:layout_constraintVertical_bias="0.228"
-            tools:layout_conversion_absoluteHeight="48dp"
-            tools:layout_conversion_absoluteWidth="88dp"
-            tools:layout_conversion_wrapHeight="126"
-            tools:layout_conversion_wrapWidth="231" />
+            <TextView
+                android:id="@+id/location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:gravity="center_horizontal"
+                android:textSize="23sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/currentLocation"
+                tools:layout_conversion_absoluteHeight="31dp"
+                tools:layout_conversion_absoluteWidth="0dp"
+                tools:layout_conversion_wrapHeight="81"
+                tools:layout_conversion_wrapWidth="0" />
+
+            <Button
+                android:id="@+id/btnIniciar"
+                android:layout_width="250dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="50dp"
+                android:layout_marginLeft="50dp"
+                android:layout_marginEnd="50dp"
+                android:layout_marginRight="50dp"
+                android:backgroundTint="#5C6BC0"
+                android:fontFamily="sans-serif"
+                android:onClick="volverLogIn"
+                android:text="@string/iniciar"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:typeface="sans"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.517"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/location"
+                app:layout_constraintVertical_bias="0.228"
+                tools:layout_conversion_absoluteHeight="100
+            dp"
+                tools:layout_conversion_absoluteWidth="90dp"
+                tools:layout_conversion_wrapHeight="126"
+                tools:layout_conversion_wrapWidth="231" />
+
+            <Button
+                android:id="@+id/btnSalir"
+                android:layout_width="250dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="50dp"
+                android:layout_marginLeft="50dp"
+                android:layout_marginEnd="50dp"
+                android:layout_marginRight="50dp"
+                android:backgroundTint="#5C6BC0"
+                android:fontFamily="sans-serif"
+                android:onClick="volverLogIn"
+                android:text="@string/salir"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:typeface="sans"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.517"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnIniciar"
+                app:layout_constraintVertical_bias="0.228"
+                tools:layout_conversion_absoluteHeight="50dp"
+                tools:layout_conversion_absoluteWidth="90dp"
+                tools:layout_conversion_wrapHeight="126"
+                tools:layout_conversion_wrapWidth="231" />
 
 
-    </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
 
 
-
-
-</android.support.constraint.ConstraintLayout>
+</ScrollView>

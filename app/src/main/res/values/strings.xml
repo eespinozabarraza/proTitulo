@@ -17,8 +17,15 @@
     <string name="activity_walking">walking</string>
     <string name="activity_unknown">Unknown</string>
     <string name="recolection">Recolección de datos</string>
-    <string name="salir">Salir</string>
+    <string name="salir">Salir de la sesión</string>
     <string name="email_input">Ingrese su correo</string>
     <string name="pass_input">Ingrese su contraseña</string>
     <string name="cancell">Cancelar</string>
+    <string name="location_updated">Location Updated: %1$s</string>
+    <string name="iniciar">Iniciar recopilación de datos</string>
+    <string name="remove_location_updates">Remove location updates</string>
+    <string name="launch_activity">Launch activity</string>
+    <string name="permission_denied_explanation">Permission was denied, but is needed for core
+        functionality.</string>
+    <string name= "settings" >Configuracion</string>
 </resources>

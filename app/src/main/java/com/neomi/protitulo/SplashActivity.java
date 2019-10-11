@@ -2,10 +2,11 @@ package com.neomi.protitulo;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.WindowManager;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class SplashActivity extends AppCompatActivity {
     private final  int DURATION_SPLASH = 2000;
@@ -17,7 +18,7 @@ public class SplashActivity extends AppCompatActivity {
         this.getWindow().setFlags( WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN );
 
         setContentView( R.layout.activity_splash );
-        new Handler().postDelayed( new Runnable() {
+        new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
@@ -28,3 +29,4 @@ public class SplashActivity extends AppCompatActivity {
         },DURATION_SPLASH );
     }
 }
+

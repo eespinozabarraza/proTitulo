@@ -186,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private long minTime; // Min Time between location updates, in milliseconds
     private float minDistance; // Min Distance between location updates, in meters
     int satelliteCount;
+    int numSatellites;
 
     // VARIABLES NMEA
     public String nmea;
@@ -520,9 +521,18 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                                 + "\n ANTENA: " +  antenaAltitud
                                 + "\n SATELITES: " + satellites.toString()
                 ));}*/
-                writeNewLocation(UserId, fecha, latitud, longitud, altitud, velocidad, ACTIVIDAD, CONFIANZA,
-                        mAzimuth, dimX, dimY, dimZ, satelliteCount,Pdop,Hdop,Vdop,geoIdH,ageOfData, antenaAltitud,
-                        satellites, Float.toString(temp));
+                if(Constants.postNougat){
+                    CantSat = satelliteCount;
+                    writeNewLocation(UserId, fecha, latitud, longitud, altitud, velocidad, ACTIVIDAD, CONFIANZA,
+                            mAzimuth, dimX, dimY, dimZ, CantSat,Pdop,Hdop,Vdop,geoIdH,ageOfData, antenaAltitud,
+                            satellites, Float.toString(temp));
+                }else{
+                    CantSat = numSatellites;
+                    Pdop  = null;Hdop  = null;Vdop  = null;geoIdH  = null;ageOfData  = null; antenaAltitud = null;
+                    writeNewLocation(UserId, fecha, latitud, longitud, altitud, velocidad, ACTIVIDAD, CONFIANZA,
+                        mAzimuth, dimX, dimY, dimZ, CantSat,Pdop,Hdop,Vdop,geoIdH,ageOfData, antenaAltitud,
+                        satellites, Float.toString(temp));}
+
             }else{
                 locationTv.setText(String.format( "Debes iniciar la recopilación de datos.  Presiona el botón!!"));
             }
@@ -863,7 +873,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     // save the satellite data in preferences
     private void putSatellitePreferences() {
-        int numSatellites = satellites.size();
+        numSatellites = satellites.size();
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(Constants.GPS_SATELLITES, numSatellites);
         int used_satellites = 0;

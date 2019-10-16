@@ -5,10 +5,10 @@ android {
     compileSdkVersion 29
     defaultConfig {
         applicationId "com.neomi.protitulo"
-        minSdkVersion 16
+        minSdkVersion 23
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

@@ -124,6 +124,8 @@ public class LocationUpdatesService extends Service {
             // Create the channel for the notification
             NotificationChannel mChannel =
                     new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+            mChannel.setSound(null,null);
+
 
             // Set the Notification Channel for the Notification Manager.
             mNotificationManager.createNotificationChannel(mChannel);
@@ -259,6 +261,7 @@ public class LocationUpdatesService extends Service {
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setTicker(text)
+                .setSound(null)
                 .setWhen(System.currentTimeMillis());
 
         // Set the Channel ID for Android O.

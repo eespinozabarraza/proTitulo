@@ -79,7 +79,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/status"
-                tools:layout_conversion_absoluteHeight="45dp"
+                tools:layout_conversion_absoluteHeight="50dp"
                 tools:layout_conversion_absoluteWidth="213dp" />
 
             <EditText
@@ -95,7 +95,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/etEmail"
-                tools:layout_conversion_absoluteHeight="45dp"
+                tools:layout_conversion_absoluteHeight="50dp"
                 tools:layout_conversion_absoluteWidth="213dp" />
 
             <Button
@@ -115,8 +115,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/etPassword"
-                tools:layout_conversion_absoluteHeight="46dp"
-                tools:layout_conversion_absoluteWidth="99dp" />
+                tools:layout_conversion_absoluteHeight="50dp"
+                tools:layout_conversion_absoluteWidth="100dp" />
 
             <Button
                 android:id="@+id/btnRegistrarse"
@@ -137,8 +137,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/btnIngresar"
                 app:layout_constraintVertical_bias="0.021"
-                tools:layout_conversion_absoluteHeight="48dp"
-                tools:layout_conversion_absoluteWidth="101dp" />
+                tools:layout_conversion_absoluteHeight="50dp"
+                tools:layout_conversion_absoluteWidth="100dp" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

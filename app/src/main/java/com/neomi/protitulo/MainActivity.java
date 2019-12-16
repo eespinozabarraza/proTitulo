@@ -523,15 +523,14 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 ));}*/
                 if(Constants.postNougat){
                     CantSat = satelliteCount;
-                    writeNewLocation(UserId, fecha, latitud, longitud, altitud, velocidad, ACTIVIDAD, CONFIANZA,
-                            mAzimuth, dimX, dimY, dimZ, CantSat,Pdop,Hdop,Vdop,geoIdH,ageOfData, antenaAltitud,
-                            satellites, Float.toString(temp));
+
                 }else{
                     CantSat = numSatellites;
                     Pdop  = null;Hdop  = null;Vdop  = null;geoIdH  = null;ageOfData  = null; antenaAltitud = null;
-                    writeNewLocation(UserId, fecha, latitud, longitud, altitud, velocidad, ACTIVIDAD, CONFIANZA,
+                    }
+                writeNewLocation(UserId, fecha, latitud, longitud, altitud, velocidad, ACTIVIDAD, CONFIANZA,
                         mAzimuth, dimX, dimY, dimZ, CantSat,Pdop,Hdop,Vdop,geoIdH,ageOfData, antenaAltitud,
-                        satellites, Float.toString(temp));}
+                        satellites, Float.toString(temp));
 
             }else{
                 locationTv.setText(String.format( "Debes iniciar la recopilación de datos.  Presiona el botón!!"));
